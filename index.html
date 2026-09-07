@@ -1,804 +1,1560 @@
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UniSkill Exchange — Peer Skill Sharing Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF0E9;
+  --paper-raised:#FFFFFF;
+  --ink:#1B241E;
+  --ink-soft:#4B564E;
+  --forest:#1F4D3A;
+  --forest-deep:#153627;
+  --gold:#C79A3B;
+  --gold-soft:#E8CE93;
+  --indigo:#33477A;
+  --line:#DAD9CC;
+  --shadow:0 1px 2px rgba(27,36,30,.06), 0 8px 24px rgba(27,36,30,.06);
+  --radius:16px;
+  --radius-sm:10px;
+  --font-display:'Fraunces', 'Georgia', serif;
+  --font-body:'Public Sans','Inter',-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+.theme-dark{
+  --paper:#131A15;
+  --paper-raised:#1B241E;
+  --ink:#EDEFE7;
+  --ink-soft:#AAB4A9;
+  --forest:#2E6B4E;
+  --forest-deep:#0F1F17;
+  --gold:#D9B458;
+  --gold-soft:#5A4B26;
+  --indigo:#7789C4;
+  --line:#2B362E;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;}
+html,body,#root{height:100%;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-display); color:var(--ink); margin:0 0 .3em; font-weight:600; letter-spacing:-.01em;}
+p{line-height:1.55; margin:.2em 0;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit; font-size:14px;}
+a{color:inherit;}
+::selection{background:var(--gold-soft);}
+
+.muted{color:var(--ink-soft); font-size:13.5px;}
+.center-text{text-align:center;}
+.center-row{justify-content:center;}
+
+.eyebrow{
+  font-family:var(--font-mono);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-size:11.5px;
+  color:var(--gold);
+  font-weight:600;
+  margin-bottom:.6em;
+}
+
+/* ===== Buttons ===== */
+.btn{
+  border:1px solid transparent;
+  border-radius:999px;
+  padding:10px 18px;
+  font-size:14px;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--forest); color:#fff;}
+.btn-primary:hover{background:var(--forest-deep);}
+.btn-outline{background:transparent; border-color:var(--line); color:var(--ink);}
+.btn-outline:hover{border-color:var(--forest);}
+.btn-ghost{background:transparent; color:var(--ink-soft);}
+.btn-ghost:hover{color:var(--ink);}
+.btn-lg{padding:14px 26px; font-size:15.5px;}
+.btn-sm{padding:7px 12px; font-size:12.5px;}
+.btn-demo-cta{background:var(--gold); color:var(--forest-deep); border-radius:12px; margin:14px; padding:12px; font-weight:700;}
+.btn[disabled]{opacity:.4; cursor:not-allowed;}
+.icon-btn{
+  background:transparent; border:1px solid var(--line); border-radius:10px;
+  width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; font-size:15px;
+}
+.link-btn{background:none; border:none; color:var(--indigo); font-weight:600; font-size:13px;}
+
+/* ===== Landing ===== */
+.landing{max-width:1080px; margin:0 auto; padding:24px 24px 80px;}
+.landing-nav{display:flex; justify-content:space-between; align-items:center; padding:10px 0 40px;}
+.brand{display:flex; align-items:center; gap:10px; font-weight:700; font-family:var(--font-display); font-size:18px;}
+.brand-mark{
+  width:38px; height:38px; border-radius:50%; background:var(--forest); color:var(--gold-soft);
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:14px;
+  box-shadow:0 0 0 3px var(--gold-soft), 0 0 0 4px var(--forest);
+}
+.landing-hero{text-align:center; padding:20px 0 56px;}
+.landing-hero h1{font-size:44px; line-height:1.12; max-width:760px; margin:0 auto .3em;}
+.landing-sub{max-width:600px; margin:0 auto 28px; color:var(--ink-soft); font-size:16px;}
+.landing-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+.landing-register-link{background:none; border:none; color:var(--indigo); margin-top:18px; font-size:13.5px; font-weight:600;}
+
+.landing-diagram{display:flex; flex-direction:column; align-items:center; gap:4px; padding:20px 0;}
+.diagram-node{
+  background:var(--paper-raised); border:1px solid var(--line); border-radius:14px; padding:12px 22px;
+  display:flex; align-items:center; gap:10px; box-shadow:var(--shadow); min-width:260px; justify-content:center;
+}
+.diagram-icon{font-size:20px;}
+.diagram-label{font-weight:600; font-size:14.5px;}
+.diagram-arrow{color:var(--gold); font-size:16px; padding:2px 0;}
+
+/* ===== Auth ===== */
+.auth-wrap{min-height:100%; display:flex; align-items:center; justify-content:center; padding:32px 16px;}
+.auth-card{background:var(--paper-raised); border-radius:var(--radius); box-shadow:var(--shadow); max-width:640px; width:100%; padding:32px;}
+.auth-steps{display:flex; gap:20px; margin-bottom:26px; flex-wrap:wrap;}
+.auth-step{display:flex; align-items:center; gap:8px; color:var(--ink-soft); font-size:13px; font-weight:600;}
+.auth-step.active{color:var(--forest);}
+.auth-step.done{color:var(--gold);}
+.auth-step-dot{width:22px; height:22px; border-radius:50%; background:var(--paper); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px;}
+.auth-step.active .auth-step-dot{background:var(--forest); color:#fff; border-color:var(--forest);}
+.auth-step.done .auth-step-dot{background:var(--gold); color:var(--forest-deep); border-color:var(--gold);}
+.auth-form h2{margin-bottom:4px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0;}
+.form-grid label{display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:600; color:var(--ink-soft);}
+.form-grid input, .form-grid select, .form-grid textarea{
+  border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:var(--paper); color:var(--ink);
+}
+.form-grid textarea{grid-column:1/-1; min-height:80px; resize:vertical;}
+.auth-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
+.onboarding-cols{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:16px 0;}
+.onboarding-cols h4{margin-bottom:10px;}
+
+/* ===== Chips / tags ===== */
+.chip-row{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0;}
+.chip{
+  border:1px solid var(--line); background:var(--paper); color:var(--ink);
+  border-radius:999px; padding:6px 12px; font-size:12.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px;
+}
+.chip-alt{border-color:var(--indigo); color:var(--indigo);}
+.chip-active{background:var(--forest); color:#fff; border-color:var(--forest);}
+.chip.chip-alt.chip-active{background:var(--indigo); color:#fff;}
+.chip-static{cursor:default;}
+.chip-x{background:none; border:none; color:inherit; font-size:11px; margin-left:2px;}
+.tag{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:3px 9px; font-size:11.5px; font-weight:600; color:var(--ink-soft);}
+
+/* ===== Shell ===== */
+.shell{display:flex; min-height:100vh;}
+.sidebar{
+  width:236px; background:var(--forest-deep); color:#EFF0E5; display:flex; flex-direction:column; flex-shrink:0;
+  position:sticky; top:0; height:100vh;
+}
+.sidebar-brand{padding:20px; color:#fff;}
+.sidebar-brand .brand-name{font-size:16px;}
+.sidebar-nav{flex:1; overflow-y:auto; padding:6px 12px; display:flex; flex-direction:column; gap:2px;}
+.nav-item{
+  display:flex; align-items:center; gap:10px; background:none; border:none; color:#C7CFC4;
+  padding:10px 12px; border-radius:10px; font-size:13.5px; font-weight:600; text-align:left; position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.06); color:#fff;}
+.nav-item-active{background:var(--forest); color:#fff;}
+.nav-icon{font-size:15px; width:18px; text-align:center;}
+.nav-badge{position:absolute; right:10px; background:var(--gold); color:var(--forest-deep); font-size:10px; font-weight:800; border-radius:999px; padding:1px 6px;}
+.shell-main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{
+  display:flex; align-items:center; gap:14px; padding:14px 24px; border-bottom:1px solid var(--line);
+  position:sticky; top:0; background:var(--paper); z-index:5;
+}
+.topbar-title{font-family:var(--font-display); font-size:19px; font-weight:600; flex:1;}
+.topbar-right{display:flex; align-items:center; gap:10px;}
+.topbar-user{display:flex; align-items:center; gap:8px; background:none; border:none; font-weight:700; font-size:13.5px;}
+.page-content{padding:24px; flex:1;}
+.mobile-only{display:none;}
+.bottom-nav{position:fixed; bottom:0; left:0; right:0; background:var(--paper-raised); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 0; z-index:20;}
+.bottom-nav-item{background:none; border:none; font-size:20px; padding:4px 14px; border-radius:10px;}
+.bottom-nav-item.active{background:var(--gold-soft);}
+
+/* ===== Generic layout ===== */
+.page-stack{display:flex; flex-direction:column; gap:20px; max-width:1180px;}
+.page-toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+.panel{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);}
+.panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.stack-list{display:flex; flex-direction:column; gap:10px;}
+
+/* ===== Dashboard ===== */
+.dash-hero{display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; background:linear-gradient(135deg,var(--forest),var(--forest-deep)); color:#fff; border-radius:var(--radius); padding:26px; box-shadow:var(--shadow);}
+.dash-hero h2{color:#fff; margin-bottom:4px;}
+.dash-hero p{color:#D6DCCF;}
+.dash-hero-stats{display:flex; gap:20px; flex-wrap:wrap;}
+.hero-stat{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px; color:#CBD3C2; font-weight:600;}
+.hero-stat-plain{font-weight:700; color:#fff; font-size:14px;}
+.rank-progress-card{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+.rank-progress-head{display:flex; justify-content:space-between; font-weight:700; margin-bottom:10px;}
+.progress-bar{height:8px; border-radius:999px; background:var(--paper); overflow:hidden;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--forest)); border-radius:999px; transition:width .4s ease;}
+.mini-student-row{display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;}
+.mini-student-row:hover{background:var(--paper);}
+.mini-student-info{display:flex; flex-direction:column; flex:1; min-width:0;}
+.mini-student-info strong{font-size:13.5px;}
+.match-tag{background:var(--gold-soft); color:var(--forest-deep); font-weight:700; font-size:11.5px; padding:4px 9px; border-radius:999px;}
+.mini-task-row{display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:12px; background:var(--paper);}
+.lb-rank{font-size:16px; width:20px;}
+.notif-row{display:flex; gap:8px; font-size:13px; padding:6px 4px;}
+
+/* ===== Avatar / coin / rank atoms ===== */
+.avatar-circle{border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); flex-shrink:0;}
+.rank-pill{display:inline-flex; align-items:center; gap:5px; background:color-mix(in srgb, var(--rank-color) 18%, transparent); color:var(--rank-color); border:1px solid var(--rank-color); font-weight:700; font-size:12px; padding:4px 10px; border-radius:999px;}
+.coin-tag{display:inline-flex; align-items:center; gap:5px; font-family:var(--font-mono); font-weight:700; color:var(--forest); background:var(--gold-soft); padding:4px 10px; border-radius:999px; font-size:12.5px;}
+.coin-tag-lg{font-size:22px; padding:8px 18px;}
+.stat-block{background:var(--paper-raised); border:1px solid var(--line); border-radius:14px; padding:14px; text-align:center; flex:1;}
+.stat-value{font-family:var(--font-display); font-size:24px; font-weight:700;}
+.stat-label{font-size:11.5px; color:var(--ink-soft); font-weight:600; margin-top:2px;}
+.stat-row{display:flex; gap:12px; flex-wrap:wrap;}
+.stat-row-wide .stat-block{min-width:120px;}
+
+/* ===== Discover ===== */
+.discover-controls{display:flex; gap:10px; flex-wrap:wrap;}
+.search-input{flex:1; min-width:220px; border:1px solid var(--line); border-radius:10px; padding:10px 14px; background:var(--paper);}
+.discover-controls select{border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:var(--paper);}
+.student-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px;}
+.student-card{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow);}
+.student-card-top{display:flex; align-items:center; gap:10px;}
+.student-card-skills{display:flex; flex-wrap:wrap; gap:6px;}
+.student-card-meta{display:flex; gap:10px; font-size:12px; color:var(--ink-soft); flex-wrap:wrap;}
+.student-card-actions{display:flex; gap:6px; flex-wrap:wrap;}
+.exchange-strip{background:var(--indigo); color:#fff; border:none; border-radius:10px; padding:8px; font-size:12px; font-weight:700;}
+.profile-modal-head{display:flex; gap:16px; align-items:center; margin-bottom:16px;}
+
+/* ===== Skills page ===== */
+.skill-row{display:flex; justify-content:space-between; align-items:center; background:var(--paper); border-radius:10px; padding:10px 12px;}
+.level-badge{margin-left:10px; font-size:11px; color:var(--ink-soft); font-weight:600;}
+.add-skill-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.add-skill-row select{border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--paper);}
+
+/* ===== Requests ===== */
+.request-card{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.request-head{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.responses{margin:10px 0;}
+.response-row{display:flex; align-items:center; gap:8px; font-size:13px; background:var(--paper); padding:8px 10px; border-radius:10px;}
+.request-actions{display:flex; gap:8px; margin-top:10px;}
+.request-actions input{flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 12px; background:var(--paper);}
+
+/* ===== Tasks ===== */
+.task-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px;}
+.task-card{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px; cursor:pointer; box-shadow:var(--shadow); transition:transform .12s;}
+.task-card:hover{transform:translateY(-2px);}
+.task-card-top{display:flex; justify-content:space-between; align-items:center;}
+.task-desc{font-size:12.5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.task-card-meta{display:flex; gap:6px; flex-wrap:wrap;}
+.task-card-owner{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); margin-top:auto;}
+.status-pill{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:4px 9px; border-radius:999px;}
+.status-open{background:#DDEBE0; color:#1F4D3A;}
+.status-in_progress{background:#FCEBC7; color:#8A6A15;}
+.status-submitted{background:#DCE3F5; color:#33477A;}
+.status-completed{background:#E4E1EF; color:#5C4A9C;}
+.lifecycle-bar{display:flex; align-items:center; margin:10px 0 18px;}
+.lifecycle-step{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px; color:var(--ink-soft); font-weight:700;}
+.lifecycle-dot{width:26px; height:26px; border-radius:50%; background:var(--paper); border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px;}
+.lifecycle-step-done .lifecycle-dot{background:var(--forest); border-color:var(--forest); color:#fff;}
+.lifecycle-step-done{color:var(--forest);}
+.lifecycle-line{flex:1; height:2px; background:var(--line); margin:0 2px; margin-bottom:16px;}
+.lifecycle-line-done{background:var(--forest);}
+.task-actions-panel{margin-top:16px; padding-top:16px; border-top:1px solid var(--line);}
+
+/* ===== Projects ===== */
+.project-card{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);}
+.project-head{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+
+/* ===== Chat ===== */
+.chat-shell{display:grid; grid-template-columns:280px 1fr; gap:16px; height:calc(100vh - 160px); min-height:440px;}
+.chat-list{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); overflow-y:auto; padding:8px;}
+.chat-list-item{display:flex; gap:10px; align-items:center; width:100%; background:none; border:none; padding:10px; border-radius:10px; text-align:left;}
+.chat-list-item.active, .chat-list-item:hover{background:var(--paper);}
+.chat-list-info{display:flex; flex-direction:column; min-width:0;}
+.chat-list-info span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:170px;}
+.chat-panel{background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); display:flex; flex-direction:column; overflow:hidden;}
+.chat-panel-head{display:flex; align-items:center; gap:10px; padding:14px; border-bottom:1px solid var(--line);}
+.chat-messages{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:8px;}
+.chat-bubble{background:var(--paper); padding:10px 14px; border-radius:14px 14px 14px 4px; max-width:70%; align-self:flex-start; font-size:13.5px;}
+.chat-bubble-me{background:var(--forest); color:#fff; border-radius:14px 14px 4px 14px; align-self:flex-end;}
+.chat-input-row{display:flex; gap:8px; padding:12px; border-top:1px solid var(--line);}
+.chat-input-row input{flex:1; border:1px solid var(--line); border-radius:999px; padding:10px 16px; background:var(--paper);}
+
+/* ===== Leaderboard ===== */
+.lb-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+.lb-table th{text-align:left; color:var(--ink-soft); font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:8px 10px; border-bottom:1px solid var(--line);}
+.lb-table td{padding:10px; border-bottom:1px solid var(--line);}
+.lb-name-cell{display:flex; align-items:center; gap:8px; font-weight:700;}
+.lb-row-me{background:var(--gold-soft);}
+
+/* ===== Notifications ===== */
+.notif-card{display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; padding:12px 14px; position:relative; font-size:13.5px;}
+.notif-unread{border-color:var(--gold);}
+.notif-icon{font-size:16px;}
+.notif-dot{width:8px; height:8px; border-radius:50%; background:var(--gold); margin-left:auto;}
+
+/* ===== Profile ===== */
+.profile-hero{display:flex; align-items:center; gap:18px; background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); flex-wrap:wrap;}
+.badge-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:10px;}
+.badge-card{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; text-align:center; display:flex; flex-direction:column; gap:4px;}
+.badge-locked{opacity:.35; filter:grayscale(1);}
+.badge-card-icon{font-size:26px;}
+.badge-row{display:flex; flex-wrap:wrap; gap:8px;}
+.badge-pill{background:var(--gold-soft); color:var(--forest-deep); padding:5px 10px; border-radius:999px; font-size:12px; font-weight:700;}
+
+/* ===== Wallet ===== */
+.wallet-balance-card{background:linear-gradient(135deg,var(--forest),var(--forest-deep)); color:#fff; border-radius:var(--radius); padding:26px; text-align:center; box-shadow:var(--shadow);}
+.wallet-balance{font-family:var(--font-display); font-size:46px; font-weight:700; margin:6px 0;}
+.wallet-note{max-width:460px; margin:12px auto 0; color:#D6DCCF; font-size:13px;}
+.earn-grid{display:flex; flex-direction:column; gap:8px;}
+.earn-grid-wide{max-width:520px; margin:0 auto;}
+.earn-row{display:flex; justify-content:space-between; align-items:center; background:var(--paper); padding:10px 14px; border-radius:10px;}
+.tx-row{display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid var(--line); font-size:13.5px;}
+.tx-amount{color:var(--forest); font-weight:700; font-family:var(--font-mono);}
+
+/* ===== Settings ===== */
+.settings-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0;}
+.switch{width:42px; height:24px; border-radius:999px; background:var(--line); border:none; position:relative; padding:0;}
+.switch-on{background:var(--forest);}
+.switch-knob{position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s ease;}
+.switch-on .switch-knob{left:21px;}
+
+/* ===== Modal ===== */
+.modal-overlay{position:fixed; inset:0; background:rgba(10,15,11,.5); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;}
+.modal-card{background:var(--paper-raised); border-radius:var(--radius); padding:22px; max-width:520px; width:100%; max-height:86vh; overflow-y:auto; box-shadow:var(--shadow);}
+.modal-wide{max-width:640px;}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+
+/* ===== Toast ===== */
+.toast-wrap{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:200;}
+.toast{background:var(--forest-deep); color:#fff; padding:12px 20px; border-radius:999px; font-size:13.5px; font-weight:600; box-shadow:var(--shadow); animation:toast-in .2s ease;}
+@keyframes toast-in{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+/* ===== Empty state ===== */
+.empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft);}
+.empty-icon{font-size:30px; margin-bottom:8px;}
+.empty-state h4{color:var(--ink); margin-bottom:4px;}
+
+/* ===== Presentation Mode ===== */
+.present-wrap{position:fixed; inset:0; background:var(--forest-deep); color:#F4F3EA; display:flex; flex-direction:column; z-index:500; overflow:hidden;}
+.present-topbar{display:flex; align-items:center; gap:16px; padding:14px 22px;}
+.present-section-nav{flex:1; display:flex; gap:5px; overflow-x:auto; justify-content:center;}
+.present-dot{width:8px; height:8px; border-radius:50%; background:rgba(244,243,234,.25); border:none; flex-shrink:0;}
+.present-dot-active{background:var(--gold); width:22px; border-radius:5px;}
+.present-progress{height:3px; background:rgba(244,243,234,.12);}
+.present-progress-fill{height:100%; background:var(--gold); transition:width .3s ease;}
+.present-body{flex:1; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding:26px 26px 10px;}
+.present-slide-counter{font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; color:var(--gold); text-transform:uppercase; margin-bottom:18px;}
+.present-slide{width:100%; max-width:1040px;}
+.present-nav{display:flex; justify-content:space-between; align-items:center; padding:16px 26px; border-top:1px solid rgba(244,243,234,.12);}
+
+.slide{color:#F4F3EA;}
+.slide h1,.slide h2,.slide h3,.slide h4{color:#F4F3EA;}
+.slide .muted{color:#B9C3B4;}
+.slide-center{text-align:center; display:flex; flex-direction:column; align-items:center;}
+.slide-center h1{font-size:52px;}
+.slide-sub{color:var(--gold); font-weight:500;}
+.slide-lead{max-width:640px; color:#D6DCCF; font-size:16px;}
+.slide-callout{margin-top:18px; font-family:var(--font-display); font-size:19px; color:var(--gold-soft); max-width:640px; text-align:center;}
+.final-title{font-size:44px; line-height:1.15;}
+
+.flow-diagram{display:flex; flex-direction:column; align-items:center; gap:0; margin-top:20px;}
+.flow-horizontal{flex-direction:row; flex-wrap:wrap; justify-content:center;}
+.flow-node{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.16); border-radius:14px; padding:12px 20px; display:flex; align-items:center; gap:10px; min-width:220px; justify-content:center;}
+.flow-horizontal .flow-node{min-width:150px; flex-direction:column; text-align:center; gap:6px;}
+.flow-icon{font-size:19px;}
+.flow-label{font-weight:600; font-size:14px;}
+.flow-arrow{color:var(--gold); font-size:16px; padding:3px 0;}
+.flow-horizontal .flow-arrow{padding:0 6px;}
+
+.problem-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:16px;}
+.problem-card{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:16px; padding:18px;}
+.problem-icon{font-size:26px; margin-bottom:8px;}
+.problem-card p{color:#C9D1C4; font-size:13.5px;}
+.problem-flow{margin-top:10px; font-family:var(--font-mono); font-size:11.5px; color:var(--gold-soft);}
+
+.hub-diagram{display:flex; flex-direction:column; align-items:center; gap:24px; margin-top:10px;}
+.hub-center{background:var(--gold); color:var(--forest-deep); font-family:var(--font-display); font-weight:700; border-radius:50%; width:150px; height:150px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:17px; box-shadow:0 0 0 8px rgba(199,154,59,.15);}
+.hub-modules{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+.hub-module{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:14px; padding:16px; text-align:center; display:flex; flex-direction:column; gap:6px;}
+.hub-module-icon{font-size:22px;}
+.hub-module span{color:#C9D1C4; font-size:12.5px;}
+
+.match-demo{display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; margin-top:16px; width:100%;}
+.match-card{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:16px; padding:18px; display:flex; flex-direction:column; align-items:center; gap:6px;}
+.match-center{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.match-percent{font-family:var(--font-display); font-size:30px; color:var(--gold);}
+.match-swap{display:flex; flex-direction:column; align-items:center; font-size:12px; color:#C9D1C4; margin-top:10px; gap:2px;}
+.two-modes{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px; width:100%;}
+.mode-card{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:14px; padding:16px;}
+.mode-card p{color:#C9D1C4; font-size:13px;}
+
+.big-coin-counter{font-family:var(--font-display); font-size:40px; color:var(--gold); margin:18px 0;}
+.rank-ladder{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:18px 0;}
+.rank-ladder-card{background:rgba(244,243,234,.06); border:1px solid var(--rank-color); border-radius:14px; padding:16px 18px; text-align:center; min-width:110px;}
+.rank-ladder-icon{font-size:26px;}
+.rank-ladder-card span{display:block; font-size:11px; color:#C9D1C4; margin-top:4px;}
+.sample-profile-card{display:flex; align-items:center; gap:14px; background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:14px; padding:16px 20px;}
+
+.unique-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:16px;}
+.unique-card{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:16px; padding:18px;}
+.unique-icon{font-size:24px; margin-bottom:8px;}
+.unique-card p{color:#C9D1C4; font-size:13px;}
+
+.tech-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;}
+.tech-row{display:flex; justify-content:space-between; background:rgba(244,243,234,.06); border-radius:10px; padding:10px 14px; font-size:13px;}
+
+.journey-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:16px 0;}
+.journey-col{background:rgba(244,243,234,.06); border:1px solid rgba(244,243,234,.14); border-radius:14px; padding:16px;}
+.journey-col p{color:#C9D1C4; font-size:13px;}
+
+.ecosystem-diagram{display:flex; flex-direction:column; align-items:center; gap:4px;}
+.eco-row{display:flex; gap:10px; justify-content:center; width:100%;}
+.eco-pair{gap:24px;}
+.eco-node{background:rgba(244,243,234,.07); border:1px solid rgba(244,243,234,.16); border-radius:10px; padding:9px 18px; font-size:12.5px; font-weight:600;}
+.eco-top{background:var(--gold); color:var(--forest-deep); font-weight:700;}
+.eco-highlight{border-color:var(--gold); color:var(--gold);}
+
+.chat-demo{display:flex; flex-direction:column; gap:8px; max-width:420px; margin:18px 0;}
+.chat-demo .chat-bubble{background:rgba(244,243,234,.08); color:#F4F3EA;}
+.chat-demo .chat-bubble-me{background:var(--gold); color:var(--forest-deep);}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .grid-2{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .onboarding-cols{grid-template-columns:1fr;}
+  .chat-shell{grid-template-columns:1fr; height:auto;}
+  .chat-list{max-height:180px;}
+  .match-demo{grid-template-columns:1fr;}
+  .two-modes{grid-template-columns:1fr;}
+  .journey-grid{grid-template-columns:1fr;}
+  .tech-grid{grid-template-columns:1fr;}
+  .hub-modules{grid-template-columns:1fr 1fr;}
+}
+@media (max-width: 760px){
+  .sidebar{position:fixed; left:-260px; top:0; bottom:0; z-index:50; transition:left .2s ease; width:230px;}
+  .sidebar-open{left:0;}
+  .mobile-only{display:flex;}
+  .mobile-hide{display:none;}
+  .page-content{padding:16px; padding-bottom:76px;}
+  .topbar{padding:12px 16px;}
+  .landing-hero h1{font-size:30px;}
+  .slide-center h1{font-size:32px;}
+  .final-title{font-size:30px;}
+  .present-body{padding:18px 16px 10px;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script>
+(() => {
+  const RANKS = [
+    { key: "bronze", label: "Bronze", icon: "\u{1F949}", min: 0, max: 499, color: "#9C6B3E" },
+    { key: "silver", label: "Silver", icon: "\u{1F948}", min: 500, max: 999, color: "#8A97A8" },
+    { key: "gold", label: "Gold", icon: "\u{1F947}", min: 1e3, max: 2499, color: "#C9A227" },
+    { key: "platinum", label: "Platinum", icon: "\u{1F48E}", min: 2500, max: 4999, color: "#3C6E71" },
+    { key: "diamond", label: "Diamond", icon: "\u{1F451}", min: 5e3, max: Infinity, color: "#5C4A9C" }
+  ];
+  function getRank(coins) {
+    return RANKS.find((r) => coins >= r.min && coins <= r.max) || RANKS[0];
+  }
+  function nextRank(coins) {
+    const idx = RANKS.findIndex((r) => coins >= r.min && coins <= r.max);
+    return RANKS[idx + 1] || null;
+  }
+  const BADGE_DEFS = [
+    { key: "first", icon: "\u{1F331}", name: "First Contribution", req: "Complete your first task." },
+    { key: "helpful", icon: "\u{1F91D}", name: "Helpful Friend", req: "Help 10 students." },
+    { key: "solver", icon: "\u{1F525}", name: "Problem Solver", req: "Complete 25 tasks." },
+    { key: "mentor", icon: "\u{1F468}\u200D\u{1F3EB}", name: "Mentor", req: "Teach 20 students." },
+    { key: "team", icon: "\u{1F680}", name: "Team Player", req: "Join 5 projects." },
+    { key: "quick", icon: "\u26A1", name: "Quick Helper", req: "Complete 10 tasks before deadline." },
+    { key: "champion", icon: "\u{1F48E}", name: "Community Champion", req: "Reach Platinum rank." }
+  ];
+  const DEPARTMENTS = [
+    "Computer Science & Engineering",
+    "Software Engineering",
+    "Electrical & Electronic Engineering",
+    "Business Administration",
+    "Graphic Design"
+  ];
+  const STUDENTS = [
+    {
+      id: 1,
+      name: "Plabon Ahmed",
+      dept: "Software Engineering",
+      semester: "3rd Semester",
+      university: "Gazipur Digital University",
+      avatar: "PA",
+      color: "#3C6E71",
+      coins: 3250,
+      totalEarned: 4800,
+      rating: 4.9,
+      reviews: 34,
+      trust: 96,
+      skillsCan: [
+        { name: "C Programming", level: "Advanced" },
+        { name: "Java", level: "Advanced" },
+        { name: "OOP", level: "Advanced" },
+        { name: "Database", level: "Intermediate" },
+        { name: "Flutter", level: "Beginner" }
+      ],
+      skillsWant: ["Python", "Artificial Intelligence", "Machine Learning"],
+      stats: { tasksCompleted: 87, studentsHelped: 42, studentsTaught: 16, projectsJoined: 24 },
+      badges: ["first", "helpful", "solver", "mentor", "team", "champion"]
+    },
+    {
+      id: 2,
+      name: "Rahim Ahmed",
+      dept: "Computer Science & Engineering",
+      semester: "4th Semester",
+      university: "Gazipur Digital University",
+      avatar: "RA",
+      color: "#C9A227",
+      coins: 2870,
+      totalEarned: 3900,
+      rating: 4.8,
+      reviews: 29,
+      trust: 94,
+      skillsCan: [
+        { name: "Flutter", level: "Advanced" },
+        { name: "Dart", level: "Advanced" },
+        { name: "Firebase", level: "Intermediate" }
+      ],
+      skillsWant: ["Java", "OOP"],
+      stats: { tasksCompleted: 61, studentsHelped: 35, studentsTaught: 12, projectsJoined: 18 },
+      badges: ["first", "helpful", "solver", "mentor", "champion"]
+    },
+    {
+      id: 3,
+      name: "Karim Hasan",
+      dept: "Computer Science & Engineering",
+      semester: "2nd Semester",
+      university: "Gazipur Digital University",
+      avatar: "KH",
+      color: "#8A4B3B",
+      coins: 2410,
+      totalEarned: 2900,
+      rating: 4.7,
+      reviews: 21,
+      trust: 90,
+      skillsCan: [
+        { name: "C Programming", level: "Intermediate" },
+        { name: "Web Development", level: "Beginner" }
+      ],
+      skillsWant: ["Flutter", "UI/UX"],
+      stats: { tasksCompleted: 40, studentsHelped: 19, studentsTaught: 4, projectsJoined: 9 },
+      badges: ["first", "helpful", "solver"]
+    },
+    {
+      id: 4,
+      name: "Nusrat Jahan",
+      dept: "Software Engineering",
+      semester: "5th Semester",
+      university: "Gazipur Digital University",
+      avatar: "NJ",
+      color: "#5C4A9C",
+      coins: 3100,
+      totalEarned: 4200,
+      rating: 4.9,
+      reviews: 31,
+      trust: 97,
+      skillsCan: [
+        { name: "Database", level: "Advanced" },
+        { name: "Backend (Node.js)", level: "Advanced" },
+        { name: "Java", level: "Intermediate" }
+      ],
+      skillsWant: ["UI/UX", "Flutter"],
+      stats: { tasksCompleted: 70, studentsHelped: 38, studentsTaught: 14, projectsJoined: 21 },
+      badges: ["first", "helpful", "solver", "mentor", "team", "champion"]
+    },
+    {
+      id: 5,
+      name: "Sadia Islam",
+      dept: "Graphic Design",
+      semester: "3rd Semester",
+      university: "Gazipur Digital University",
+      avatar: "SI",
+      color: "#B85C3E",
+      coins: 1840,
+      totalEarned: 2300,
+      rating: 4.8,
+      reviews: 18,
+      trust: 92,
+      skillsCan: [
+        { name: "UI/UX", level: "Advanced" },
+        { name: "Graphic Design", level: "Advanced" },
+        { name: "Presentation", level: "Intermediate" }
+      ],
+      skillsWant: ["Flutter", "Frontend Basics"],
+      stats: { tasksCompleted: 33, studentsHelped: 20, studentsTaught: 9, projectsJoined: 11 },
+      badges: ["first", "helpful", "solver"]
+    },
+    {
+      id: 6,
+      name: "Hasan Mahmud",
+      dept: "Electrical & Electronic Engineering",
+      semester: "6th Semester",
+      university: "Gazipur Digital University",
+      avatar: "HM",
+      color: "#3E6E4B",
+      coins: 980,
+      totalEarned: 1400,
+      rating: 4.6,
+      reviews: 12,
+      trust: 88,
+      skillsCan: [
+        { name: "Mathematics", level: "Advanced" },
+        { name: "C Programming", level: "Intermediate" }
+      ],
+      skillsWant: ["Python", "Machine Learning"],
+      stats: { tasksCompleted: 22, studentsHelped: 10, studentsTaught: 3, projectsJoined: 5 },
+      badges: ["first", "helpful"]
+    },
+    {
+      id: 7,
+      name: "Tanjim Rahman",
+      dept: "Computer Science & Engineering",
+      semester: "7th Semester",
+      university: "Gazipur Digital University",
+      avatar: "TR",
+      color: "#2B3A67",
+      coins: 4650,
+      totalEarned: 5800,
+      rating: 5,
+      reviews: 40,
+      trust: 98,
+      skillsCan: [
+        { name: "Python", level: "Advanced" },
+        { name: "Machine Learning", level: "Advanced" },
+        { name: "Research", level: "Advanced" }
+      ],
+      skillsWant: ["Public Speaking"],
+      stats: { tasksCompleted: 95, studentsHelped: 51, studentsTaught: 22, projectsJoined: 27 },
+      badges: ["first", "helpful", "solver", "mentor", "team", "quick", "champion"]
+    },
+    {
+      id: 8,
+      name: "Mim Akter",
+      dept: "Business Administration",
+      semester: "4th Semester",
+      university: "Gazipur Digital University",
+      avatar: "MA",
+      color: "#8A2E5B",
+      coins: 1320,
+      totalEarned: 1700,
+      rating: 4.7,
+      reviews: 15,
+      trust: 91,
+      skillsCan: [
+        { name: "Presentation", level: "Advanced" },
+        { name: "Public Speaking", level: "Advanced" },
+        { name: "English", level: "Intermediate" }
+      ],
+      skillsWant: ["Video Editing", "Research"],
+      stats: { tasksCompleted: 26, studentsHelped: 14, studentsTaught: 7, projectsJoined: 8 },
+      badges: ["first", "helpful"]
+    },
+    {
+      id: 9,
+      name: "Fahim Chowdhury",
+      dept: "Software Engineering",
+      semester: "1st Semester",
+      university: "Gazipur Digital University",
+      avatar: "FC",
+      color: "#4B6E8A",
+      coins: 260,
+      totalEarned: 260,
+      rating: 4.5,
+      reviews: 3,
+      trust: 80,
+      skillsCan: [{ name: "Video Editing", level: "Beginner" }],
+      skillsWant: ["C Programming", "Java", "OOP"],
+      stats: { tasksCompleted: 3, studentsHelped: 1, studentsTaught: 0, projectsJoined: 1 },
+      badges: ["first"]
+    },
+    {
+      id: 10,
+      name: "Nabila Haque",
+      dept: "Graphic Design",
+      semester: "5th Semester",
+      university: "Gazipur Digital University",
+      avatar: "NH",
+      color: "#A8763E",
+      coins: 2150,
+      totalEarned: 2600,
+      rating: 4.8,
+      reviews: 20,
+      trust: 93,
+      skillsCan: [
+        { name: "Graphic Design", level: "Expert" },
+        { name: "Video Editing", level: "Advanced" }
+      ],
+      skillsWant: ["Web Development"],
+      stats: { tasksCompleted: 48, studentsHelped: 24, studentsTaught: 10, projectsJoined: 13 },
+      badges: ["first", "helpful", "solver", "mentor"]
+    }
+  ];
+  const CURRENT_USER_ID = 1;
+  const TASKS = [
+    {
+      id: 1,
+      title: "Help Me Fix a Java OOP Bug",
+      desc: "My inheritance hierarchy throws a NullPointerException on the constructor. Need someone to walk through it with me.",
+      category: "Programming",
+      skill: "Java",
+      difficulty: "Medium",
+      reward: 50,
+      deadline: "2026-08-10",
+      ownerId: 3,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 2,
+      title: "Explain a DSA Problem \u2014 Binary Search Variants",
+      desc: "Struggling with lower_bound / upper_bound style binary search problems. Need a walkthrough with examples.",
+      category: "Programming",
+      skill: "C Programming",
+      difficulty: "Easy",
+      reward: 30,
+      deadline: "2026-08-08",
+      ownerId: 9,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 3,
+      title: "Help With Flutter UI \u2014 Custom Bottom Sheet",
+      desc: "Need help building a draggable custom bottom sheet with animated snap points.",
+      category: "Mobile Development",
+      skill: "Flutter",
+      difficulty: "Medium",
+      reward: 60,
+      deadline: "2026-08-12",
+      ownerId: 3,
+      status: "in_progress",
+      applicants: [2],
+      helperId: 2
+    },
+    {
+      id: 4,
+      title: "Review My Database Design (3NF check)",
+      desc: "Please review my ER diagram and schema for a library management system for normalization issues.",
+      category: "Database",
+      skill: "Database",
+      difficulty: "Medium",
+      reward: 45,
+      deadline: "2026-08-09",
+      ownerId: 6,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 5,
+      title: "Design a Logo for Our Club Event",
+      desc: "Need a clean, modern logo for the CSE Club's annual tech fest.",
+      category: "Design",
+      skill: "Graphic Design",
+      difficulty: "Easy",
+      reward: 40,
+      deadline: "2026-08-07",
+      ownerId: 8,
+      status: "submitted",
+      applicants: [10],
+      helperId: 10
+    },
+    {
+      id: 6,
+      title: "Help With UI/UX for a Mobile App Wireframe",
+      desc: "Need feedback and a redesign pass on 5 wireframe screens for usability.",
+      category: "Design",
+      skill: "UI/UX",
+      difficulty: "Medium",
+      reward: 55,
+      deadline: "2026-08-15",
+      ownerId: 9,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 7,
+      title: "Edit a 3-Minute Orientation Video",
+      desc: "Trim, color-correct and add captions to our department orientation footage.",
+      category: "Media",
+      skill: "Video Editing",
+      difficulty: "Medium",
+      reward: 70,
+      deadline: "2026-08-14",
+      ownerId: 8,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 8,
+      title: "Analyze an Excel Dataset for a Research Project",
+      desc: "Need help cleaning a survey dataset and producing summary charts.",
+      category: "Data",
+      skill: "Research",
+      difficulty: "Hard",
+      reward: 80,
+      deadline: "2026-08-18",
+      ownerId: 6,
+      status: "open",
+      applicants: [],
+      helperId: null
+    },
+    {
+      id: 9,
+      title: "Explain the Concept of Polymorphism With Examples",
+      desc: "Preparing for a viva \u2014 need clear real-world examples of polymorphism in Java.",
+      category: "Programming",
+      skill: "OOP",
+      difficulty: "Easy",
+      reward: 25,
+      deadline: "2026-08-06",
+      ownerId: 9,
+      status: "completed",
+      applicants: [1],
+      helperId: 1
+    },
+    {
+      id: 10,
+      title: "Help Practice for a Presentation",
+      desc: "Need someone to listen to my 5-minute pitch and give feedback on delivery.",
+      category: "Soft Skills",
+      skill: "Public Speaking",
+      difficulty: "Easy",
+      reward: 20,
+      deadline: "2026-08-11",
+      ownerId: 3,
+      status: "open",
+      applicants: [],
+      helperId: null
+    }
+  ];
+  const LEARNING_REQUESTS = [
+    { id: 1, title: "I Want To Learn Flutter", desc: "I know basic Dart and want to learn Flutter app development.", category: "Programming", skill: "Flutter", availability: "Weekends", posterId: 3, responses: [{ studentId: 2, text: "I can help you with Flutter basics." }] },
+    { id: 2, title: "I Want To Learn Python for Data Analysis", desc: "Coming from Java, want to pick up pandas and basic data analysis.", category: "Programming", skill: "Python", availability: "Weekday evenings", posterId: 1, responses: [{ studentId: 7, text: "Happy to walk you through pandas basics." }] },
+    { id: 3, title: "I Want To Learn UI/UX Fundamentals", desc: "I can code but my designs look rough \u2014 want to learn UI/UX basics.", category: "Design", skill: "UI/UX", availability: "Weekends", posterId: 9, responses: [{ studentId: 5, text: "I can share a beginner UI/UX roadmap and review your work." }] },
+    { id: 4, title: "I Want To Learn Public Speaking", desc: "I freeze during presentations, want practical tips and practice.", category: "Soft Skills", skill: "Public Speaking", availability: "Anytime", posterId: 6, responses: [] },
+    { id: 5, title: "I Want To Learn Firebase Basics", desc: "Building a Flutter app and need to connect Firebase Auth & Firestore.", category: "Programming", skill: "Firebase", availability: "Weekends", posterId: 3, responses: [{ studentId: 2, text: "I use Firebase daily, can help." }] },
+    { id: 6, title: "I Want To Learn Video Editing", desc: "Want to learn basic cuts, transitions and captions for club content.", category: "Media", skill: "Video Editing", availability: "Weekday evenings", posterId: 8, responses: [] },
+    { id: 7, title: "I Want To Learn Database Normalization", desc: "Confused between 2NF and 3NF, want a practical walkthrough.", category: "Database", skill: "Database", availability: "Weekends", posterId: 5, responses: [{ studentId: 4, text: "I can walk you through it with a real schema." }] },
+    { id: 8, title: "I Want To Learn Machine Learning Basics", desc: "Want an intro to ML concepts before my elective course starts.", category: "Programming", skill: "Machine Learning", availability: "Anytime", posterId: 1, responses: [{ studentId: 7, text: "Let's start with linear regression from scratch." }] },
+    { id: 9, title: "I Want To Learn Graphic Design Tools", desc: "Want to get comfortable with layout and typography basics.", category: "Design", skill: "Graphic Design", availability: "Weekends", posterId: 6, responses: [] },
+    { id: 10, title: "I Want To Learn OOP Concepts", desc: "First semester, OOP feels abstract \u2014 need real examples.", category: "Programming", skill: "OOP", availability: "Weekday evenings", posterId: 9, responses: [{ studentId: 1, text: "I can explain OOP with everyday examples." }] }
+  ];
+  const PROJECTS = [
+    {
+      id: 1,
+      title: "University Event Management App",
+      desc: "A mobile app to manage club events, RSVPs and schedules for the whole university.",
+      roles: [
+        { role: "Flutter Developer", icon: "\u{1F4F1}" },
+        { role: "UI/UX Designer", icon: "\u{1F3A8}" },
+        { role: "Backend Developer", icon: "\u2699\uFE0F" },
+        { role: "Project Manager", icon: "\u{1F4CA}" }
+      ],
+      recommended: [
+        { studentId: 2, role: "Flutter Developer", match: 95 },
+        { studentId: 5, role: "UI/UX Designer", match: 91 },
+        { studentId: 4, role: "Backend Developer", match: 89 }
+      ],
+      ownerId: 1,
+      members: [1]
+    },
+    {
+      id: 2,
+      title: "Peer Tutoring Scheduler",
+      desc: "A lightweight scheduler that matches tutors and learners by free time slots.",
+      roles: [
+        { role: "Frontend Developer", icon: "\u{1F4BB}" },
+        { role: "Backend Developer", icon: "\u2699\uFE0F" },
+        { role: "UI/UX Designer", icon: "\u{1F3A8}" }
+      ],
+      recommended: [
+        { studentId: 9, role: "Frontend Developer", match: 88 },
+        { studentId: 4, role: "Backend Developer", match: 92 },
+        { studentId: 10, role: "UI/UX Designer", match: 85 }
+      ],
+      ownerId: 7,
+      members: [7]
+    },
+    {
+      id: 3,
+      title: "Department Research Data Portal",
+      desc: "A dashboard to visualize and share department research datasets.",
+      roles: [
+        { role: "Data Analyst", icon: "\u{1F4CA}" },
+        { role: "Backend Developer", icon: "\u2699\uFE0F" },
+        { role: "Researcher", icon: "\u{1F52C}" }
+      ],
+      recommended: [
+        { studentId: 7, role: "Data Analyst", match: 96 },
+        { studentId: 4, role: "Backend Developer", match: 90 },
+        { studentId: 6, role: "Researcher", match: 84 }
+      ],
+      ownerId: 9,
+      members: [9]
+    }
+  ];
+  const CONVERSATIONS = [
+    {
+      id: 1,
+      withId: 2,
+      messages: [
+        { from: 1, text: "Hi Rahim, I saw that you know Flutter." },
+        { from: 2, text: "Yes, I can help you with the basics." },
+        { from: 1, text: "I can help you with Java OOP in return." },
+        { from: 2, text: "Deal! Let's do a skill exchange \u{1F504}" }
+      ]
+    },
+    {
+      id: 2,
+      withId: 3,
+      messages: [
+        { from: 3, text: "Hey, are you free to look at my Java OOP bug?" },
+        { from: 1, text: "Sure, send me the error stack trace." }
+      ]
+    },
+    {
+      id: 3,
+      withId: 9,
+      messages: [{ from: 9, text: "Thanks for explaining polymorphism, it finally clicked!" }]
+    }
+  ];
+  const NOTIFICATIONS = [
+    { id: 1, text: "Rahim accepted your task application.", type: "task", read: false, target: "tasks" },
+    { id: 2, text: "You earned 50 UniCoins for completing a task.", type: "coin", read: false, target: "wallet" },
+    { id: 3, text: "Karim sent you a message.", type: "message", read: false, target: "messages" },
+    { id: 4, text: "You received a skill exchange request from Rahim.", type: "exchange", read: true, target: "discover" },
+    { id: 5, text: "Your rank increased to Platinum \u{1F48E}", type: "rank", read: true, target: "profile" },
+    { id: 6, text: "You earned the Problem Solver badge \u{1F525}", type: "badge", read: true, target: "profile" }
+  ];
+  const SKILL_CATALOG = [
+    "C Programming",
+    "C++",
+    "Java",
+    "Python",
+    "Dart",
+    "Flutter",
+    "OOP",
+    "Database",
+    "Web Development",
+    "UI/UX",
+    "Graphic Design",
+    "Video Editing",
+    "Presentation",
+    "Public Speaking",
+    "English",
+    "Mathematics",
+    "Research",
+    "Machine Learning",
+    "Artificial Intelligence",
+    "Firebase",
+    "Backend (Node.js)"
+  ];
+  const { useState, useEffect, useRef, useMemo } = React;
+  function studentById(students, id) {
+    return students.find((s) => s.id === id);
+  }
+  function skillMatch(a, b) {
+    const aCan = a.skillsCan.map((s) => s.name);
+    const bCan = b.skillsCan.map((s) => s.name);
+    const aWant = a.skillsWant;
+    const bWant = b.skillsWant;
+    const hit1 = aCan.filter((s) => bWant.includes(s)).length;
+    const hit2 = bCan.filter((s) => aWant.includes(s)).length;
+    const total = Math.max(aWant.length + bWant.length, 1);
+    const raw = (hit1 + hit2) / total * 100;
+    return Math.min(98, Math.round(raw * 1.6 + (hit1 > 0 && hit2 > 0 ? 15 : 0)));
+  }
+  function Avatar({ student, size = 40 }) {
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "avatar-circle",
+        style: {
+          width: size,
+          height: size,
+          background: student.color,
+          fontSize: size * 0.36
+        }
+      },
+      student.avatar
+    );
+  }
+  function RankPill({ coins, compact }) {
+    const r = getRank(coins);
+    return /* @__PURE__ */ React.createElement("span", { className: "rank-pill", style: { "--rank-color": r.color } }, /* @__PURE__ */ React.createElement("span", { className: "rank-pill-icon" }, r.icon), !compact && /* @__PURE__ */ React.createElement("span", null, r.label));
+  }
+  function CoinTag({ amount, size }) {
+    return /* @__PURE__ */ React.createElement("span", { className: "coin-tag" + (size === "lg" ? " coin-tag-lg" : "") }, /* @__PURE__ */ React.createElement("span", { className: "coin-dot" }, "\u{1FA99}"), amount.toLocaleString());
+  }
+  function StatBlock({ label, value }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "stat-block" }, /* @__PURE__ */ React.createElement("div", { className: "stat-value" }, value), /* @__PURE__ */ React.createElement("div", { className: "stat-label" }, label));
+  }
+  function SectionEyebrow({ children }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "eyebrow" }, children);
+  }
+  function EmptyState({ icon, title, text }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "empty-state" }, /* @__PURE__ */ React.createElement("div", { className: "empty-icon" }, icon), /* @__PURE__ */ React.createElement("h4", null, title), /* @__PURE__ */ React.createElement("p", null, text));
+  }
+  function Toast({ toast }) {
+    if (!toast) return null;
+    return /* @__PURE__ */ React.createElement("div", { className: "toast-wrap" }, /* @__PURE__ */ React.createElement("div", { className: "toast" }, toast));
+  }
+  function Modal({ title, onClose, children, wide }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "modal-overlay", onClick: onClose }, /* @__PURE__ */ React.createElement("div", { className: "modal-card" + (wide ? " modal-wide" : ""), onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("div", { className: "modal-head" }, /* @__PURE__ */ React.createElement("h3", null, title), /* @__PURE__ */ React.createElement("button", { className: "icon-btn", onClick: onClose }, "\u2715")), /* @__PURE__ */ React.createElement("div", { className: "modal-body" }, children)));
+  }
+  const NAV_ITEMS = [
+    { key: "dashboard", label: "Dashboard", icon: "\u{1F3E0}" },
+    { key: "discover", label: "Discover", icon: "\u{1F50D}" },
+    { key: "skills", label: "Skills", icon: "\u{1F9E9}" },
+    { key: "requests", label: "Learning Requests", icon: "\u{1F64B}" },
+    { key: "tasks", label: "Tasks", icon: "\u{1F5C2}\uFE0F" },
+    { key: "projects", label: "Projects", icon: "\u{1F680}" },
+    { key: "messages", label: "Messages", icon: "\u{1F4AC}" },
+    { key: "leaderboard", label: "Leaderboard", icon: "\u{1F3C6}" },
+    { key: "notifications", label: "Notifications", icon: "\u{1F514}" },
+    { key: "profile", label: "Profile", icon: "\u{1F464}" },
+    { key: "wallet", label: "Coin Wallet", icon: "\u{1FA99}" },
+    { key: "settings", label: "Settings", icon: "\u2699\uFE0F" }
+  ];
+  function Landing({ onEnterAuth, onDemoLogin, onOpenPresentation }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "landing" }, /* @__PURE__ */ React.createElement("div", { className: "landing-nav" }, /* @__PURE__ */ React.createElement("div", { className: "brand" }, /* @__PURE__ */ React.createElement("span", { className: "brand-mark" }, "US"), /* @__PURE__ */ React.createElement("span", { className: "brand-name" }, "UniSkill Exchange")), /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: onOpenPresentation }, "\u{1F3AC} Project Demo")), /* @__PURE__ */ React.createElement("div", { className: "landing-hero" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Gazipur Digital University \xB7 Peer Network"), /* @__PURE__ */ React.createElement("h1", null, "Every student here", /* @__PURE__ */ React.createElement("br", null), "already knows something", /* @__PURE__ */ React.createElement("br", null), "someone else needs."), /* @__PURE__ */ React.createElement("p", { className: "landing-sub" }, "UniSkill Exchange is a university-based peer-to-peer platform where students learn from each other, teach what they know, help with tasks, collaborate on projects, and build a trusted reputation \u2014 one contribution at a time."), /* @__PURE__ */ React.createElement("div", { className: "landing-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-lg", onClick: onDemoLogin }, "\u{1F680} Enter Interactive App"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-lg", onClick: onOpenPresentation }, "\u{1F3AC} Watch Project Demo")), /* @__PURE__ */ React.createElement("button", { className: "landing-register-link", onClick: onEnterAuth }, "or create a new student account \u2192")), /* @__PURE__ */ React.createElement("div", { className: "landing-diagram" }, [
+      ["\u{1F393}", "Student"],
+      ["\u{1F9E9}", "Has Skills"],
+      ["\u{1F4E4}", "Shares Knowledge"],
+      ["\u{1F91D}", "Helps Other Students"],
+      ["\u2705", "Completes Tasks"],
+      ["\u{1FA99}", "Earns UniCoins"],
+      ["\u{1F4C8}", "Builds Reputation"],
+      ["\u{1F3C5}", "Unlocks Ranks & Badges"],
+      ["\u{1F6E1}\uFE0F", "Trusted Community Member"]
+    ].map(([icon, label], i, arr) => /* @__PURE__ */ React.createElement(React.Fragment, { key: label }, /* @__PURE__ */ React.createElement("div", { className: "diagram-node" }, /* @__PURE__ */ React.createElement("div", { className: "diagram-icon" }, icon), /* @__PURE__ */ React.createElement("div", { className: "diagram-label" }, label)), i < arr.length - 1 && /* @__PURE__ */ React.createElement("div", { className: "diagram-arrow" }, "\u2193")))));
+  }
+  function AuthFlow({ onComplete, onBack }) {
+    const [step, setStep] = useState(0);
+    const [form, setForm] = useState({ name: "", email: "", studentId: "", dept: DEPARTMENTS[0], batch: "", semester: "", password: "" });
+    const [code, setCode] = useState("");
+    const [canTeach, setCanTeach] = useState([]);
+    const [wantLearn, setWantLearn] = useState([]);
+    const steps = ["Register", "Verify Email", "Build Skill Profile"];
+    return /* @__PURE__ */ React.createElement("div", { className: "auth-wrap" }, /* @__PURE__ */ React.createElement("div", { className: "auth-card" }, /* @__PURE__ */ React.createElement("div", { className: "auth-steps" }, steps.map((s, i) => /* @__PURE__ */ React.createElement("div", { key: s, className: "auth-step" + (i === step ? " active" : i < step ? " done" : "") }, /* @__PURE__ */ React.createElement("span", { className: "auth-step-dot" }, i < step ? "\u2713" : i + 1), /* @__PURE__ */ React.createElement("span", null, s)))), step === 0 && /* @__PURE__ */ React.createElement("div", { className: "auth-form" }, /* @__PURE__ */ React.createElement("h2", null, "Create your student account"), /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Join the peer network at your university."), /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("label", null, "Full Name", /* @__PURE__ */ React.createElement("input", { value: form.name, onChange: (e) => setForm({ ...form, name: e.target.value }), placeholder: "e.g. Fahim Chowdhury" })), /* @__PURE__ */ React.createElement("label", null, "University Email", /* @__PURE__ */ React.createElement("input", { value: form.email, onChange: (e) => setForm({ ...form, email: e.target.value }), placeholder: "you@gdu.edu.bd" })), /* @__PURE__ */ React.createElement("label", null, "Student ID", /* @__PURE__ */ React.createElement("input", { value: form.studentId, onChange: (e) => setForm({ ...form, studentId: e.target.value }), placeholder: "221-15-xxxx" })), /* @__PURE__ */ React.createElement("label", null, "Department", /* @__PURE__ */ React.createElement("select", { value: form.dept, onChange: (e) => setForm({ ...form, dept: e.target.value }) }, DEPARTMENTS.map((d) => /* @__PURE__ */ React.createElement("option", { key: d }, d)))), /* @__PURE__ */ React.createElement("label", null, "Batch", /* @__PURE__ */ React.createElement("input", { value: form.batch, onChange: (e) => setForm({ ...form, batch: e.target.value }), placeholder: "Batch 42" })), /* @__PURE__ */ React.createElement("label", null, "Semester", /* @__PURE__ */ React.createElement("input", { value: form.semester, onChange: (e) => setForm({ ...form, semester: e.target.value }), placeholder: "3rd Semester" })), /* @__PURE__ */ React.createElement("label", null, "Password", /* @__PURE__ */ React.createElement("input", { type: "password", value: form.password, onChange: (e) => setForm({ ...form, password: e.target.value }), placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" }))), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: onBack }, "\u2190 Back"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setStep(1) }, "Continue"))), step === 1 && /* @__PURE__ */ React.createElement("div", { className: "auth-form" }, /* @__PURE__ */ React.createElement("h2", null, "Verify your university email"), /* @__PURE__ */ React.createElement("p", { className: "muted" }, "We sent a 6-digit verification code to ", /* @__PURE__ */ React.createElement("strong", null, form.email || "your university email"), ". (Prototype: any code works.)"), /* @__PURE__ */ React.createElement("label", null, "Verification Code", /* @__PURE__ */ React.createElement("input", { value: code, onChange: (e) => setCode(e.target.value), placeholder: "123456" })), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: () => setStep(0) }, "\u2190 Back"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setStep(2) }, "Verify & Continue"))), step === 2 && /* @__PURE__ */ React.createElement("div", { className: "auth-form" }, /* @__PURE__ */ React.createElement("h2", null, "Build your skill profile"), /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Pick a few skills you can help with, and a few you want to learn. You can edit these anytime."), /* @__PURE__ */ React.createElement("div", { className: "onboarding-cols" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h4", null, "Skills I Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, SKILL_CATALOG.map((s) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: s,
+        className: "chip" + (canTeach.includes(s) ? " chip-active" : ""),
+        onClick: () => setCanTeach(canTeach.includes(s) ? canTeach.filter((x) => x !== s) : [...canTeach, s])
+      },
+      s
+    )))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h4", null, "Skills I Want To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, SKILL_CATALOG.map((s) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: s,
+        className: "chip chip-alt" + (wantLearn.includes(s) ? " chip-active" : ""),
+        onClick: () => setWantLearn(wantLearn.includes(s) ? wantLearn.filter((x) => x !== s) : [...wantLearn, s])
+      },
+      s
+    ))))), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: () => setStep(1) }, "\u2190 Back"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onComplete({ form, canTeach, wantLearn }) }, "Enter Dashboard \u{1F680}")))));
+  }
+  function AppShell({ page, setPage, me, students, notifications, darkMode, setDarkMode, onOpenPresentation, onLogout, children, mobileNavOpen, setMobileNavOpen }) {
+    const unread = notifications.filter((n) => !n.read).length;
+    return /* @__PURE__ */ React.createElement("div", { className: "shell" }, /* @__PURE__ */ React.createElement("aside", { className: "sidebar" + (mobileNavOpen ? " sidebar-open" : "") }, /* @__PURE__ */ React.createElement("div", { className: "brand sidebar-brand" }, /* @__PURE__ */ React.createElement("span", { className: "brand-mark" }, "US"), /* @__PURE__ */ React.createElement("span", { className: "brand-name" }, "UniSkill")), /* @__PURE__ */ React.createElement("nav", { className: "sidebar-nav" }, NAV_ITEMS.map((item) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: item.key,
+        className: "nav-item" + (page === item.key ? " nav-item-active" : ""),
+        onClick: () => {
+          setPage(item.key);
+          setMobileNavOpen(false);
+        }
+      },
+      /* @__PURE__ */ React.createElement("span", { className: "nav-icon" }, item.icon),
+      /* @__PURE__ */ React.createElement("span", null, item.label),
+      item.key === "notifications" && unread > 0 && /* @__PURE__ */ React.createElement("span", { className: "nav-badge" }, unread)
+    ))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-demo-cta", onClick: onOpenPresentation }, "\u{1F3AC} Project Demo")), /* @__PURE__ */ React.createElement("div", { className: "shell-main" }, /* @__PURE__ */ React.createElement("header", { className: "topbar" }, /* @__PURE__ */ React.createElement("button", { className: "icon-btn mobile-only", onClick: () => setMobileNavOpen(!mobileNavOpen) }, "\u2630"), /* @__PURE__ */ React.createElement("div", { className: "topbar-title" }, NAV_ITEMS.find((n) => n.key === page)?.label), /* @__PURE__ */ React.createElement("div", { className: "topbar-right" }, /* @__PURE__ */ React.createElement("button", { className: "icon-btn", title: "Toggle dark mode", onClick: () => setDarkMode(!darkMode) }, darkMode ? "\u2600\uFE0F" : "\u{1F319}"), /* @__PURE__ */ React.createElement("button", { className: "topbar-user", onClick: () => setPage("profile") }, /* @__PURE__ */ React.createElement(Avatar, { student: me, size: 32 }), /* @__PURE__ */ React.createElement("span", { className: "mobile-hide" }, me.name.split(" ")[0])), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm mobile-hide", onClick: onLogout }, "Log out"))), /* @__PURE__ */ React.createElement("main", { className: "page-content" }, children), /* @__PURE__ */ React.createElement("nav", { className: "bottom-nav mobile-only" }, NAV_ITEMS.slice(0, 5).map((item) => /* @__PURE__ */ React.createElement("button", { key: item.key, className: "bottom-nav-item" + (page === item.key ? " active" : ""), onClick: () => setPage(item.key) }, /* @__PURE__ */ React.createElement("span", null, item.icon))))));
+  }
+  function Dashboard({ me, students, tasks, requests, notifications, setPage, setToast }) {
+    const rank = getRank(me.coins);
+    const nr = nextRank(me.coins);
+    const matches = students.filter((s) => s.id !== me.id).map((s) => ({ s, match: skillMatch(me, s) })).sort((a, b) => b.match - a.match).slice(0, 3);
+    const myOpenTasks = tasks.filter((t) => t.helperId === me.id && t.status !== "completed");
+    const recent = notifications.slice(0, 4);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "dash-hero" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h2", null, "Good to see you, ", me.name.split(" ")[0], " \u{1F44B}"), /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Here are people and opportunities that match your skills today.")), /* @__PURE__ */ React.createElement("div", { className: "dash-hero-stats" }, /* @__PURE__ */ React.createElement("div", { className: "hero-stat" }, /* @__PURE__ */ React.createElement(CoinTag, { amount: me.coins, size: "lg" }), /* @__PURE__ */ React.createElement("span", null, "Balance")), /* @__PURE__ */ React.createElement("div", { className: "hero-stat" }, /* @__PURE__ */ React.createElement(RankPill, { coins: me.coins }), /* @__PURE__ */ React.createElement("span", null, "Rank")), /* @__PURE__ */ React.createElement("div", { className: "hero-stat" }, /* @__PURE__ */ React.createElement("span", { className: "hero-stat-plain" }, "\u2B50 ", me.rating), /* @__PURE__ */ React.createElement("span", null, "Rating")), /* @__PURE__ */ React.createElement("div", { className: "hero-stat" }, /* @__PURE__ */ React.createElement("span", { className: "hero-stat-plain" }, "\u{1F6E1}\uFE0F ", me.trust, "%"), /* @__PURE__ */ React.createElement("span", null, "Trust")))), /* @__PURE__ */ React.createElement("div", { className: "rank-progress-card" }, /* @__PURE__ */ React.createElement("div", { className: "rank-progress-head" }, /* @__PURE__ */ React.createElement("span", null, rank.icon, " ", rank.label), nr ? /* @__PURE__ */ React.createElement("span", { className: "muted" }, (nr.min - me.coins).toLocaleString(), " UniCoins to ", nr.label, " ", nr.icon) : /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Top rank reached \u{1F451}")), /* @__PURE__ */ React.createElement("div", { className: "progress-bar" }, /* @__PURE__ */ React.createElement("div", { className: "progress-fill", style: { width: nr ? `${(me.coins - rank.min) / (nr.min - rank.min) * 100}%` : "100%" } }))), /* @__PURE__ */ React.createElement("div", { className: "grid-2" }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-head" }, /* @__PURE__ */ React.createElement("h3", null, "Recommended Students"), /* @__PURE__ */ React.createElement("button", { className: "link-btn", onClick: () => setPage("discover") }, "See all \u2192")), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, matches.map(({ s, match }) => /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: s.id }, /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 38 }), /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" }, /* @__PURE__ */ React.createElement("strong", null, s.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, s.skillsCan.slice(0, 2).map((x) => x.name).join(", "))), /* @__PURE__ */ React.createElement("span", { className: "match-tag" }, match, "% match"))))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-head" }, /* @__PURE__ */ React.createElement("h3", null, "Your Active Tasks"), /* @__PURE__ */ React.createElement("button", { className: "link-btn", onClick: () => setPage("tasks") }, "See all \u2192")), myOpenTasks.length === 0 ? /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F5C2}\uFE0F", title: "No active tasks", text: "Browse the task marketplace to start helping and earning UniCoins." }) : /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, myOpenTasks.map((t) => /* @__PURE__ */ React.createElement("div", { className: "mini-task-row", key: t.id }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, t.title), /* @__PURE__ */ React.createElement("div", { className: "muted" }, t.status.replace("_", " "))), /* @__PURE__ */ React.createElement(CoinTag, { amount: t.reward })))))), /* @__PURE__ */ React.createElement("div", { className: "grid-2" }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-head" }, /* @__PURE__ */ React.createElement("h3", null, "Leaderboard Preview"), /* @__PURE__ */ React.createElement("button", { className: "link-btn", onClick: () => setPage("leaderboard") }, "Full board \u2192")), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, [...students].sort((a, b) => b.coins - a.coins).slice(0, 3).map((s, i) => /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: s.id }, /* @__PURE__ */ React.createElement("span", { className: "lb-rank" }, ["\u{1F947}", "\u{1F948}", "\u{1F949}"][i]), /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 34 }), /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" }, /* @__PURE__ */ React.createElement("strong", null, s.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, s.dept)), /* @__PURE__ */ React.createElement(CoinTag, { amount: s.coins }))))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-head" }, /* @__PURE__ */ React.createElement("h3", null, "Recent Notifications"), /* @__PURE__ */ React.createElement("button", { className: "link-btn", onClick: () => setPage("notifications") }, "See all \u2192")), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, recent.map((n) => /* @__PURE__ */ React.createElement("div", { className: "notif-row", key: n.id }, /* @__PURE__ */ React.createElement("span", null, n.read ? "\u{1F539}" : "\u{1F538}"), /* @__PURE__ */ React.createElement("span", null, n.text)))))));
+  }
+  function Discover({ me, students, onOpenProfile, onOffer, onMessage, onExchange }) {
+    const [query, setQuery] = useState("");
+    const [deptFilter, setDeptFilter] = useState("all");
+    const filtered = students.filter((s) => s.id !== me.id).filter((s) => {
+      const q = query.trim().toLowerCase();
+      const matchesQuery = !q || s.name.toLowerCase().includes(q) || s.skillsCan.some((k) => k.name.toLowerCase().includes(q)) || s.skillsWant.some((k) => k.toLowerCase().includes(q));
+      const matchesDept = deptFilter === "all" || s.dept === deptFilter;
+      return matchesQuery && matchesDept;
+    });
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "discover-controls" }, /* @__PURE__ */ React.createElement("input", { className: "search-input", placeholder: "Search by name or skill (e.g. Flutter)", value: query, onChange: (e) => setQuery(e.target.value) }), /* @__PURE__ */ React.createElement("select", { value: deptFilter, onChange: (e) => setDeptFilter(e.target.value) }, /* @__PURE__ */ React.createElement("option", { value: "all" }, "All Departments"), DEPARTMENTS.map((d) => /* @__PURE__ */ React.createElement("option", { key: d }, d))))), /* @__PURE__ */ React.createElement("div", { className: "student-grid" }, filtered.map((s) => {
+      const match = skillMatch(me, s);
+      return /* @__PURE__ */ React.createElement("div", { className: "student-card", key: s.id }, /* @__PURE__ */ React.createElement("div", { className: "student-card-top" }, /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 48 }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, s.name), /* @__PURE__ */ React.createElement("div", { className: "muted" }, s.dept)), /* @__PURE__ */ React.createElement("span", { className: "match-tag" }, match, "%")), /* @__PURE__ */ React.createElement("div", { className: "student-card-skills" }, s.skillsCan.slice(0, 3).map((k) => /* @__PURE__ */ React.createElement("span", { className: "tag", key: k.name }, k.name))), /* @__PURE__ */ React.createElement("div", { className: "student-card-meta" }, /* @__PURE__ */ React.createElement(RankPill, { coins: s.coins, compact: true }), /* @__PURE__ */ React.createElement("span", null, "\u2B50 ", s.rating), /* @__PURE__ */ React.createElement("span", null, "\u{1F6E1}\uFE0F ", s.trust, "%")), /* @__PURE__ */ React.createElement("div", { className: "student-card-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: () => onOpenProfile(s) }, "View Profile"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: () => onMessage(s) }, "Message"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => onOffer(s) }, "Offer Help")), match >= 60 && /* @__PURE__ */ React.createElement("button", { className: "exchange-strip", onClick: () => onExchange(s) }, "\u{1F504} ", match, "% Skill Match \u2014 Start Skill Exchange"));
+    }), filtered.length === 0 && /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F50D}", title: "No students found", text: "Try a different search term or clear the filter." })));
+  }
+  function StudentProfileModal({ student, onClose, onMessage }) {
+    const rank = getRank(student.coins);
+    return /* @__PURE__ */ React.createElement(Modal, { title: "Student Profile", onClose }, /* @__PURE__ */ React.createElement("div", { className: "profile-modal-head" }, /* @__PURE__ */ React.createElement(Avatar, { student, size: 64 }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h3", null, student.name), /* @__PURE__ */ React.createElement("p", { className: "muted" }, student.dept, " \xB7 ", student.semester), /* @__PURE__ */ React.createElement("div", { className: "student-card-meta" }, /* @__PURE__ */ React.createElement(RankPill, { coins: student.coins }), /* @__PURE__ */ React.createElement("span", null, "\u2B50 ", student.rating, " (", student.reviews, ")"), /* @__PURE__ */ React.createElement("span", null, "\u{1F6E1}\uFE0F ", student.trust, "%")))), /* @__PURE__ */ React.createElement("h4", null, "Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, student.skillsCan.map((k) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: k.name }, k.name, " \xB7 ", k.level))), /* @__PURE__ */ React.createElement("h4", null, "Wants To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, student.skillsWant.map((k) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-alt chip-static", key: k }, k))), /* @__PURE__ */ React.createElement("h4", null, "Statistics"), /* @__PURE__ */ React.createElement("div", { className: "stat-row" }, /* @__PURE__ */ React.createElement(StatBlock, { label: "Tasks Completed", value: student.stats.tasksCompleted }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Helped", value: student.stats.studentsHelped }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Taught", value: student.stats.studentsTaught }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Projects Joined", value: student.stats.projectsJoined })), /* @__PURE__ */ React.createElement("h4", null, "Badges"), /* @__PURE__ */ React.createElement("div", { className: "badge-row" }, student.badges.map((bk) => {
+      const b = BADGE_DEFS.find((x) => x.key === bk);
+      return /* @__PURE__ */ React.createElement("span", { className: "badge-pill", key: bk, title: b.req }, b.icon, " ", b.name);
+    })), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onMessage(student) }, "Message ", student.name.split(" ")[0])));
+  }
+  function SkillsPage({ me, onAddCan, onRemoveCan, onAddWant, onRemoveWant }) {
+    const [newSkill, setNewSkill] = useState(SKILL_CATALOG[0]);
+    const [newLevel, setNewLevel] = useState("Beginner");
+    const [wantSkill, setWantSkill] = useState(SKILL_CATALOG[0]);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "grid-2" }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Skills I Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, me.skillsCan.map((k, i) => /* @__PURE__ */ React.createElement("div", { className: "skill-row", key: k.name + i }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, k.name), /* @__PURE__ */ React.createElement("span", { className: "level-badge" }, k.level)), /* @__PURE__ */ React.createElement("button", { className: "icon-btn", onClick: () => onRemoveCan(i) }, "\u{1F5D1}\uFE0F"))), me.skillsCan.length === 0 && /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F9E9}", title: "No skills yet", text: "Add a skill so other students can find you." })), /* @__PURE__ */ React.createElement("div", { className: "add-skill-row" }, /* @__PURE__ */ React.createElement("select", { value: newSkill, onChange: (e) => setNewSkill(e.target.value) }, SKILL_CATALOG.map((s) => /* @__PURE__ */ React.createElement("option", { key: s }, s))), /* @__PURE__ */ React.createElement("select", { value: newLevel, onChange: (e) => setNewLevel(e.target.value) }, ["Beginner", "Intermediate", "Advanced", "Expert"].map((l) => /* @__PURE__ */ React.createElement("option", { key: l }, l))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => onAddCan(newSkill, newLevel) }, "+ Add"))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Skills I Want To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, me.skillsWant.map((s, i) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-alt chip-static", key: s }, s, " ", /* @__PURE__ */ React.createElement("button", { className: "chip-x", onClick: () => onRemoveWant(i) }, "\u2715"))), me.skillsWant.length === 0 && /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F3AF}", title: "Nothing added yet", text: "List what you'd like to learn so others can offer help." })), /* @__PURE__ */ React.createElement("div", { className: "add-skill-row" }, /* @__PURE__ */ React.createElement("select", { value: wantSkill, onChange: (e) => setWantSkill(e.target.value) }, SKILL_CATALOG.map((s) => /* @__PURE__ */ React.createElement("option", { key: s }, s))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => onAddWant(wantSkill) }, "+ Add")))));
+  }
+  function LearningRequests({ me, students, requests, onCreate, onRespond, setToast }) {
+    const [showCreate, setShowCreate] = useState(false);
+    const [form, setForm] = useState({ title: "", desc: "", category: "Programming", skill: "", availability: "Weekends" });
+    const [replyDrafts, setReplyDrafts] = useState({});
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "page-toolbar" }, /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Publicly share what you want to learn \u2014 other students can offer help."), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setShowCreate(true) }, "+ New Learning Request")), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, requests.map((r) => {
+      const poster = studentById(students, r.posterId);
+      return /* @__PURE__ */ React.createElement("div", { className: "request-card", key: r.id }, /* @__PURE__ */ React.createElement("div", { className: "request-head" }, /* @__PURE__ */ React.createElement(Avatar, { student: poster, size: 38 }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, r.title), /* @__PURE__ */ React.createElement("div", { className: "muted" }, "by ", poster.name, " \xB7 ", r.availability)), /* @__PURE__ */ React.createElement("span", { className: "tag" }, r.skill)), /* @__PURE__ */ React.createElement("p", null, r.desc), /* @__PURE__ */ React.createElement("div", { className: "stack-list responses" }, r.responses.map((resp, i) => {
+        const rs = studentById(students, resp.studentId);
+        return /* @__PURE__ */ React.createElement("div", { className: "response-row", key: i }, /* @__PURE__ */ React.createElement(Avatar, { student: rs, size: 26 }), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, rs.name, ":"), " ", resp.text));
+      })), /* @__PURE__ */ React.createElement("div", { className: "request-actions" }, /* @__PURE__ */ React.createElement("input", { placeholder: "I can help you with...", value: replyDrafts[r.id] || "", onChange: (e) => setReplyDrafts({ ...replyDrafts, [r.id]: e.target.value }) }), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: () => {
+        onRespond(r.id, replyDrafts[r.id] || "I can help you with this!");
+        setReplyDrafts({ ...replyDrafts, [r.id]: "" });
+        setToast("Offer to help sent \u{1F64C}");
+      } }, "Offer Help")));
+    })), showCreate && /* @__PURE__ */ React.createElement(Modal, { title: "New Learning Request", onClose: () => setShowCreate(false) }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("label", null, "Title", /* @__PURE__ */ React.createElement("input", { value: form.title, onChange: (e) => setForm({ ...form, title: e.target.value }), placeholder: "I Want To Learn ..." })), /* @__PURE__ */ React.createElement("label", null, "Description", /* @__PURE__ */ React.createElement("textarea", { value: form.desc, onChange: (e) => setForm({ ...form, desc: e.target.value }), placeholder: "What do you already know? What do you want to learn?" })), /* @__PURE__ */ React.createElement("label", null, "Skill", /* @__PURE__ */ React.createElement("input", { value: form.skill, onChange: (e) => setForm({ ...form, skill: e.target.value }), placeholder: "e.g. Flutter" })), /* @__PURE__ */ React.createElement("label", null, "Availability", /* @__PURE__ */ React.createElement("select", { value: form.availability, onChange: (e) => setForm({ ...form, availability: e.target.value }) }, ["Weekends", "Weekday evenings", "Anytime"].map((a) => /* @__PURE__ */ React.createElement("option", { key: a }, a))))), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: () => setShowCreate(false) }, "Cancel"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
+      if (!form.title.trim()) {
+        setToast("Please add a title");
+        return;
+      }
       onCreate(form);
       setShowCreate(false);
       setForm({ title: "", desc: "", category: "Programming", skill: "", availability: "Weekends" });
-      setToast("Learning request posted!");
+      setToast("Learning request posted \u{1F389}");
     } }, "Post Request"))));
   }
-
-  function TasksPage({ me, students, tasks, onCreateTask, onApplyTask, onUpdateTaskStatus, setToast }) {
+  const TASK_STEPS = ["open", "in_progress", "submitted", "completed"];
+  const TASK_STEP_LABELS = { open: "Open", in_progress: "In Progress", submitted: "Submitted", completed: "Completed" };
+  function TaskLifecycleBar({ status }) {
+    const idx = TASK_STEPS.indexOf(status);
+    return /* @__PURE__ */ React.createElement("div", { className: "lifecycle-bar" }, TASK_STEPS.map((s, i) => /* @__PURE__ */ React.createElement(React.Fragment, { key: s }, /* @__PURE__ */ React.createElement("div", { className: "lifecycle-step" + (i <= idx ? " lifecycle-step-done" : "") }, /* @__PURE__ */ React.createElement("div", { className: "lifecycle-dot" }, i < idx ? "\u2713" : i + 1), /* @__PURE__ */ React.createElement("span", null, TASK_STEP_LABELS[s])), i < TASK_STEPS.length - 1 && /* @__PURE__ */ React.createElement("div", { className: "lifecycle-line" + (i < idx ? " lifecycle-line-done" : "") }))));
+  }
+  function Tasks({ me, students, tasks, onCreate, onApply, onAccept, onSubmitWork, onApprove, onRevision, setToast }) {
     const [showCreate, setShowCreate] = useState(false);
-    const [selectedTask, setSelectedTask] = useState(null);
-    const [filterSkill, setFilterSkill] = useState("all");
-    const [filterStatus, setFilterStatus] = useState("all");
-    const [form, setForm] = useState({ title: "", desc: "", category: "Programming", skill: "Java", difficulty: "Medium", reward: 50, deadline: "2026-08-20" });
-
-    const filteredTasks = tasks.filter(t => {
-      const matchSkill = filterSkill === "all" || t.skill === filterSkill;
-      const matchStatus = filterStatus === "all" || t.status === filterStatus;
-      return matchSkill && matchStatus;
-    });
-
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "page-toolbar" },
-        /* @__PURE__ */ React.createElement("div", { className: "discover-controls" },
-          /* @__PURE__ */ React.createElement("select", { value: filterSkill, onChange: (e) => setFilterSkill(e.target.value) },
-            /* @__PURE__ */ React.createElement("option", { value: "all" }, "All Skills"),
-            SKILL_CATALOG.map(s => /* @__PURE__ */ React.createElement("option", { key: s }, s))
-          ),
-          /* @__PURE__ */ React.createElement("select", { value: filterStatus, onChange: (e) => setFilterStatus(e.target.value) },
-            /* @__PURE__ */ React.createElement("option", { value: "all" }, "All Statuses"),
-            /* @__PURE__ */ React.createElement("option", { value: "open" }, "Open"),
-            /* @__PURE__ */ React.createElement("option", { value: "in_progress" }, "In Progress"),
-            /* @__PURE__ */ React.createElement("option", { value: "submitted" }, "Submitted"),
-            /* @__PURE__ */ React.createElement("option", { value: "completed" }, "Completed")
-          )
-        ),
-        /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setShowCreate(true) }, "+ Post New Task")
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "task-grid" },
-        filteredTasks.map(t => {
-          const owner = studentById(students, t.ownerId);
-          return /* @__PURE__ */ React.createElement("div", { className: "task-card", key: t.id, onClick: () => setSelectedTask(t) },
-            /* @__PURE__ */ React.createElement("div", { className: "task-card-top" },
-              /* @__PURE__ */ React.createElement("span", { className: "status-pill status-" + t.status }, t.status.replace("_", " ")),
-              /* @__PURE__ */ React.createElement(CoinTag, { amount: t.reward })
-            ),
-            /* @__PURE__ */ React.createElement("strong", null, t.title),
-            /* @__PURE__ */ React.createElement("p", { className: "task-desc muted" }, t.desc),
-            /* @__PURE__ */ React.createElement("div", { className: "task-card-meta" },
-              /* @__PURE__ */ React.createElement("span", { className: "tag" }, t.skill),
-              /* @__PURE__ */ React.createElement("span", { className: "tag" }, t.difficulty)
-            ),
-            /* @__PURE__ */ React.createElement("div", { className: "task-card-owner" },
-              /* @__PURE__ */ React.createElement(Avatar, { student: owner, size: 22 }),
-              /* @__PURE__ */ React.createElement("span", null, owner.name)
-            )
-          );
-        })
-      ),
-      selectedTask && /* @__PURE__ */ React.createElement(TaskDetailModal, {
-        task: selectedTask,
-        me,
-        students,
-        onClose: () => setSelectedTask(null),
-        onApply: (taskId) => {
-          onApplyTask(taskId);
-          setSelectedTask(null);
-          setToast("Applied for task![cite: 2]");
-        },
-        onUpdateStatus: (taskId, newStatus) => {
-          onUpdateTaskStatus(taskId, newStatus);
-          setSelectedTask(null);
-          setToast(`Task updated to ${newStatus.replace("_", " ")}!`);
-        }
-      }),
-      showCreate && /* @__PURE__ */ React.createElement(Modal, { title: "Post a New Task", onClose: () => setShowCreate(false) },
-        /* @__PURE__ */ React.createElement("div", { className: "form-grid" },
-          /* @__PURE__ */ React.createElement("label", null, "Task Title",
-            /* @__PURE__ */ React.createElement("input", { value: form.title, onChange: e => setForm({ ...form, title: e.target.value }), placeholder: "e.g. Help Debug Java OOP Hierarchy" })
-          ),
-          /* @__PURE__ */ React.createElement("label", null, "Required Skill",
-            /* @__PURE__ */ React.createElement("select", { value: form.skill, onChange: e => setForm({ ...form, skill: e.target.value }) },
-              SKILL_CATALOG.map(s => /* @__PURE__ */ React.createElement("option", { key: s }, s))
-            )
-          ),
-          /* @__PURE__ */ React.createElement("label", null, "Reward (UniCoins)",
-            /* @__PURE__ */ React.createElement("input", { type: "number", value: form.reward, onChange: e => setForm({ ...form, reward: parseInt(e.target.value) || 0 }) })
-          ),
-          /* @__PURE__ */ React.createElement("label", null, "Difficulty",
-            /* @__PURE__ */ React.createElement("select", { value: form.difficulty, onChange: e => setForm({ ...form, difficulty: e.target.value }) },
-              ["Easy", "Medium", "Hard"].map(d => /* @__PURE__ */ React.createElement("option", { key: d }, d))
-            )
-          ),
-          /* @__PURE__ */ React.createElement("label", null, "Description",
-            /* @__PURE__ */ React.createElement("textarea", { value: form.desc, onChange: e => setForm({ ...form, desc: e.target.value }), placeholder: "Explain what you need help with..." })
-          )
-        ),
-        /* @__PURE__ */ React.createElement("div", { className: "auth-actions" },
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: () => setShowCreate(false) }, "Cancel"),
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
-            if (!form.title.trim()) return setToast("Please provide a title");
-            onCreateTask(form);
-            setShowCreate(false);
-            setToast("Task posted successfully![cite: 2]");
-          } }, "Post Task")
-        )
-      )
-    );
+    const [filter, setFilter] = useState("all");
+    const [activeTask, setActiveTask] = useState(null);
+    const [form, setForm] = useState({ title: "", desc: "", category: "Programming", skill: "", difficulty: "Easy", reward: 30, deadline: "" });
+    const filtered = tasks.filter((t) => filter === "all" ? true : filter === "mine" ? t.ownerId === me.id || t.helperId === me.id : t.status === filter);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "page-toolbar" }, /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["all", "open", "in_progress", "submitted", "completed", "mine"].map((f) => /* @__PURE__ */ React.createElement("button", { key: f, className: "chip" + (filter === f ? " chip-active" : ""), onClick: () => setFilter(f) }, f === "mine" ? "My Tasks" : TASK_STEP_LABELS[f] || "All"))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setShowCreate(true) }, "+ Post a Task")), /* @__PURE__ */ React.createElement("div", { className: "task-grid" }, filtered.map((t) => {
+      const owner = studentById(students, t.ownerId);
+      return /* @__PURE__ */ React.createElement("div", { className: "task-card", key: t.id, onClick: () => setActiveTask(t) }, /* @__PURE__ */ React.createElement("div", { className: "task-card-top" }, /* @__PURE__ */ React.createElement("span", { className: "status-pill status-" + t.status }, TASK_STEP_LABELS[t.status]), /* @__PURE__ */ React.createElement(CoinTag, { amount: t.reward })), /* @__PURE__ */ React.createElement("strong", null, t.title), /* @__PURE__ */ React.createElement("p", { className: "muted task-desc" }, t.desc), /* @__PURE__ */ React.createElement("div", { className: "task-card-meta" }, /* @__PURE__ */ React.createElement("span", { className: "tag" }, t.skill), /* @__PURE__ */ React.createElement("span", { className: "tag" }, t.difficulty)), /* @__PURE__ */ React.createElement("div", { className: "task-card-owner" }, /* @__PURE__ */ React.createElement(Avatar, { student: owner, size: 26 }), /* @__PURE__ */ React.createElement("span", null, owner.name)));
+    }), filtered.length === 0 && /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F5C2}\uFE0F", title: "No tasks here", text: "Try a different filter or post a new task." })), showCreate && /* @__PURE__ */ React.createElement(Modal, { title: "Post a Task", onClose: () => setShowCreate(false) }, /* @__PURE__ */ React.createElement("div", { className: "form-grid" }, /* @__PURE__ */ React.createElement("label", null, "Title", /* @__PURE__ */ React.createElement("input", { value: form.title, onChange: (e) => setForm({ ...form, title: e.target.value }), placeholder: "e.g. Help Me Fix a Java OOP Bug" })), /* @__PURE__ */ React.createElement("label", null, "Description", /* @__PURE__ */ React.createElement("textarea", { value: form.desc, onChange: (e) => setForm({ ...form, desc: e.target.value }), placeholder: "Describe what kind of help you need" })), /* @__PURE__ */ React.createElement("label", null, "Required Skill", /* @__PURE__ */ React.createElement("input", { value: form.skill, onChange: (e) => setForm({ ...form, skill: e.target.value }), placeholder: "e.g. Java" })), /* @__PURE__ */ React.createElement("label", null, "Difficulty", /* @__PURE__ */ React.createElement("select", { value: form.difficulty, onChange: (e) => setForm({ ...form, difficulty: e.target.value }) }, ["Easy", "Medium", "Hard"].map((d) => /* @__PURE__ */ React.createElement("option", { key: d }, d)))), /* @__PURE__ */ React.createElement("label", null, "UniCoin Reward", /* @__PURE__ */ React.createElement("input", { type: "number", value: form.reward, onChange: (e) => setForm({ ...form, reward: Number(e.target.value) }) })), /* @__PURE__ */ React.createElement("label", null, "Deadline", /* @__PURE__ */ React.createElement("input", { type: "date", value: form.deadline, onChange: (e) => setForm({ ...form, deadline: e.target.value }) }))), /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost", onClick: () => setShowCreate(false) }, "Cancel"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
+      if (!form.title.trim()) {
+        setToast("Please add a title");
+        return;
+      }
+      onCreate(form);
+      setShowCreate(false);
+      setForm({ title: "", desc: "", category: "Programming", skill: "", difficulty: "Easy", reward: 30, deadline: "" });
+      setToast("Task posted to the marketplace \u{1F5C2}\uFE0F");
+    } }, "Post Task"))), activeTask && /* @__PURE__ */ React.createElement(Modal, { title: activeTask.title, onClose: () => setActiveTask(null), wide: true }, /* @__PURE__ */ React.createElement(TaskLifecycleBar, { status: activeTask.status }), /* @__PURE__ */ React.createElement("p", null, activeTask.desc), /* @__PURE__ */ React.createElement("div", { className: "task-card-meta" }, /* @__PURE__ */ React.createElement("span", { className: "tag" }, activeTask.skill), /* @__PURE__ */ React.createElement("span", { className: "tag" }, activeTask.difficulty), /* @__PURE__ */ React.createElement(CoinTag, { amount: activeTask.reward }), activeTask.deadline && /* @__PURE__ */ React.createElement("span", { className: "tag" }, "Due ", activeTask.deadline)), /* @__PURE__ */ React.createElement("div", { className: "task-actions-panel" }, activeTask.status === "open" && activeTask.ownerId !== me.id && !activeTask.applicants.includes(me.id) && /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
+      onApply(activeTask.id);
+      setToast("Applied to task \u2705");
+      setActiveTask({ ...activeTask, applicants: [...activeTask.applicants, me.id] });
+    } }, "Apply"), activeTask.status === "open" && activeTask.ownerId !== me.id && activeTask.applicants.includes(me.id) && /* @__PURE__ */ React.createElement("p", { className: "muted" }, "You've applied \u2014 waiting for the owner to accept."), activeTask.status === "open" && activeTask.ownerId === me.id && activeTask.applicants.length > 0 && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Applicants:"), activeTask.applicants.map((aid) => {
+      const a = studentById(students, aid);
+      return /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: aid }, /* @__PURE__ */ React.createElement(Avatar, { student: a, size: 30 }), /* @__PURE__ */ React.createElement("strong", null, a.name), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => {
+        onAccept(activeTask.id, aid);
+        setToast(a.name + " accepted for the task");
+        setActiveTask({ ...activeTask, status: "in_progress", helperId: aid });
+      } }, "Accept"));
+    })), activeTask.status === "open" && activeTask.ownerId === me.id && activeTask.applicants.length === 0 && /* @__PURE__ */ React.createElement("p", { className: "muted" }, "No applicants yet \u2014 check back soon."), activeTask.status === "in_progress" && activeTask.helperId === me.id && /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
+      onSubmitWork(activeTask.id);
+      setToast("Work submitted for review \u{1F4E4}");
+      setActiveTask({ ...activeTask, status: "submitted" });
+    } }, "Submit Work"), activeTask.status === "in_progress" && activeTask.ownerId === me.id && /* @__PURE__ */ React.createElement("p", { className: "muted" }, studentById(students, activeTask.helperId).name, " is working on this task."), activeTask.status === "submitted" && activeTask.ownerId === me.id && /* @__PURE__ */ React.createElement("div", { className: "auth-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", onClick: () => {
+      onRevision(activeTask.id);
+      setToast("Revision requested");
+      setActiveTask({ ...activeTask, status: "in_progress" });
+    } }, "Request Revision"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
+      onApprove(activeTask.id);
+      setToast("Task approved \u2014 UniCoins rewarded \u{1FA99}");
+      setActiveTask({ ...activeTask, status: "completed" });
+    } }, "Approve")), activeTask.status === "submitted" && activeTask.helperId === me.id && /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Submitted \u2014 waiting for ", studentById(students, activeTask.ownerId).name, " to review."), activeTask.status === "completed" && /* @__PURE__ */ React.createElement("p", { className: "muted" }, "\u{1F389} Task completed", activeTask.helperId ? " \u2014 " + studentById(students, activeTask.helperId).name + " earned " + activeTask.reward + " UniCoins." : "."))));
   }
-
-  function TaskDetailModal({ task, me, students, onClose, onApply, onUpdateStatus }) {
-    const owner = studentById(students, task.ownerId);
-    const helper = task.helperId ? studentById(students, task.helperId) : null;
-    const isOwner = task.ownerId === me.id;
-    const isHelper = task.helperId === me.id;
-    const steps = ["open", "in_progress", "submitted", "completed"];
-    const currentStepIdx = steps.indexOf(task.status);
-
-    return /* @__PURE__ */ React.createElement(Modal, { title: "Task Details", onClose },
-      /* @__PURE__ */ React.createElement("h3", null, task.title),
-      /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Posted by ", owner.name, " \xB7 Deadline: ", task.deadline),
-      /* @__PURE__ */ React.createElement("div", { className: "lifecycle-bar" },
-        steps.map((s, idx) => /* @__PURE__ */ React.createElement(React.Fragment, { key: s },
-          /* @__PURE__ */ React.createElement("div", { className: "lifecycle-step" + (idx <= currentStepIdx ? " lifecycle-step-done" : "") },
-            /* @__PURE__ */ React.createElement("div", { className: "lifecycle-dot" }, idx <= currentStepIdx ? "\u2713" : idx + 1),
-            /* @__PURE__ */ React.createElement("span", null, s.replace("_", " "))
-          ),
-          idx < steps.length - 1 && /* @__PURE__ */ React.createElement("div", { className: "lifecycle-line" + (idx < currentStepIdx ? " lifecycle-line-done" : "") })
-        ))
-      ),
-      /* @__PURE__ */ React.createElement("p", null, task.desc),
-      /* @__PURE__ */ React.createElement("div", { className: "stat-row" },
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Reward", value: `${task.reward} Coins` }),
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Skill", value: task.skill }),
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Difficulty", value: task.difficulty })
-      ),
-      helper && /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", style: { marginTop: 14 } },
-        /* @__PURE__ */ React.createElement(Avatar, { student: helper, size: 32 }),
-        /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" },
-          /* @__PURE__ */ React.createElement("strong", null, helper.name),
-          /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Assigned Helper")
-        )
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "task-actions-panel" },
-        !isOwner && task.status === "open" && !task.applicants.includes(me.id) &&
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onApply(task.id) }, "Apply to Help"),
-        isHelper && task.status === "in_progress" &&
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onUpdateStatus(task.id, "submitted") }, "Submit Work for Review"),
-        isOwner && task.status === "submitted" &&
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onUpdateStatus(task.id, "completed") }, "Accept & Release Reward")
-      )
-    );
+  function Projects({ me, students, projects, onJoin, onInvite, setToast }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Find teammates based on actual skills, or join a project already forming."), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, projects.map((p) => /* @__PURE__ */ React.createElement("div", { className: "project-card", key: p.id }, /* @__PURE__ */ React.createElement("div", { className: "project-head" }, /* @__PURE__ */ React.createElement("h3", null, p.title), p.members.includes(me.id) ? /* @__PURE__ */ React.createElement("span", { className: "status-pill status-completed" }, "Joined") : /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => {
+      onJoin(p.id);
+      setToast("You joined " + p.title + " \u{1F680}");
+    } }, "Join Project")), /* @__PURE__ */ React.createElement("p", null, p.desc), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, p.roles.map((r) => /* @__PURE__ */ React.createElement("span", { className: "tag", key: r.role }, r.icon, " ", r.role))), /* @__PURE__ */ React.createElement("h4", null, "Recommended Students"), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, p.recommended.map((rec) => {
+      const s = studentById(students, rec.studentId);
+      return /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: rec.studentId }, /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 32 }), /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" }, /* @__PURE__ */ React.createElement("strong", null, s.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, rec.role)), /* @__PURE__ */ React.createElement("span", { className: "match-tag" }, rec.match, "% match"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: () => {
+        onInvite(s);
+        setToast("Invited " + s.name + " to " + p.title);
+      } }, "Invite"));
+    }))))));
   }
-
-  function ProjectsPage({ me, students, projects, setToast }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      projects.map(p => {
-        const owner = studentById(students, p.ownerId);
-        return /* @__PURE__ */ React.createElement("div", { className: "project-card", key: p.id },
-          /* @__PURE__ */ React.createElement("div", { className: "project-head" },
-            /* @__PURE__ */ React.createElement("div", null,
-              /* @__PURE__ */ React.createElement("h3", null, p.title),
-              /* @__PURE__ */ React.createElement("p", { className: "muted" }, "Led by ", owner.name)
-            ),
-            /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: () => setToast("Project join request sent!") }, "Join Team")
-          ),
-          /* @__PURE__ */ React.createElement("p", null, p.desc),
-          /* @__PURE__ */ React.createElement("h4", { style: { marginTop: 12 } }, "Required Roles"),
-          /* @__PURE__ */ React.createElement("div", { className: "chip-row" },
-            p.roles.map(r => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: r.role }, r.icon, " ", r.role))
-          ),
-          /* @__PURE__ */ React.createElement("h4", { style: { marginTop: 12 } }, "Algorithmic Team Recommendations"),
-          /* @__PURE__ */ React.createElement("div", { className: "stack-list" },
-            p.recommended.map(rec => {
-              const candidate = studentById(students, rec.studentId);
-              return /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: rec.studentId },
-                /* @__PURE__ */ React.createElement(Avatar, { student: candidate, size: 32 }),
-                /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" },
-                  /* @__PURE__ */ React.createElement("strong", null, candidate.name),
-                  /* @__PURE__ */ React.createElement("span", { className: "muted" }, rec.role)
-                ),
-                /* @__PURE__ */ React.createElement("span", { className: "match-tag" }, rec.match, "% Match")
-              );
-            })
-          )
-        );
-      })
-    );
-  }
-
-  function MessagesPage({ me, students, conversations, onSendMessage }) {
-    const [activeId, setActiveId] = useState(conversations[0]?.id || null);
-    const [text, setText] = useState("");
-    const activeConv = conversations.find(c => c.id === activeId);
-    const otherUser = activeConv ? studentById(students, activeConv.withId) : null;
-
-    return /* @__PURE__ */ React.createElement("div", { className: "chat-shell" },
-      /* @__PURE__ */ React.createElement("div", { className: "chat-list" },
-        conversations.map(c => {
-          const user = studentById(students, c.withId);
-          const lastMsg = c.messages[c.messages.length - 1];
-          return /* @__PURE__ */ React.createElement("button", {
-            key: c.id,
-            className: "chat-list-item" + (c.id === activeId ? " active" : ""),
-            onClick: () => setActiveId(c.id)
-          },
-            /* @__PURE__ */ React.createElement(Avatar, { student: user, size: 36 }),
-            /* @__PURE__ */ React.createElement("div", { className: "chat-list-info" },
-              /* @__PURE__ */ React.createElement("strong", null, user.name),
-              /* @__PURE__ */ React.createElement("span", { className: "muted" }, lastMsg ? lastMsg.text : "No messages yet")
-            )
-          );
-        })
-      ),
-      activeConv ? /* @__PURE__ */ React.createElement("div", { className: "chat-panel" },
-        /* @__PURE__ */ React.createElement("div", { className: "chat-panel-head" },
-          /* @__PURE__ */ React.createElement(Avatar, { student: otherUser, size: 36 }),
-          /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("strong", null, otherUser.name),
-            /* @__PURE__ */ React.createElement("div", { className: "muted" }, otherUser.dept)
-          )
-        ),
-        /* @__PURE__ */ React.createElement("div", { className: "chat-messages" },
-          activeConv.messages.map((m, idx) =>
-            /* @__PURE__ */ React.createElement("div", {
-              key: idx,
-              className: "chat-bubble" + (m.from === me.id ? " chat-bubble-me" : "")
-            }, m.text)
-          )
-        ),
-        /* @__PURE__ */ React.createElement("div", { className: "chat-input-row" },
-          /* @__PURE__ */ React.createElement("input", {
-            placeholder: "Type a message...",
-            value: text,
-            onChange: e => setText(e.target.value),
-            onKeyDown: e => {
-              if (e.key === "Enter" && text.trim()) {
-                onSendMessage(activeConv.id, text);
-                setText("");
-              }
-            }
-          }),
-          /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => {
-            if (text.trim()) {
-              onSendMessage(activeConv.id, text);
-              setText("");
-            }
-          } }, "Send")
-        )
-      ) : /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F4AC}", title: "No conversation selected", text: "Choose a contact from the list on the left to view messages." })
-    );
-  }
-
-  function LeaderboardPage({ me, students }) {
-    const sorted = [...students].sort((a, b) => b.coins - a.coins);
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "panel" },
-        /* @__PURE__ */ React.createElement("table", { className: "lb-table" },
-          /* @__PURE__ */ React.createElement("thead", null,
-            /* @__PURE__ */ React.createElement("tr", null,
-              /* @__PURE__ */ React.createElement("th", null, "Rank"),
-              /* @__PURE__ */ React.createElement("th", null, "Student"),
-              /* @__PURE__ */ React.createElement("th", null, "Department"),
-              /* @__PURE__ */ React.createElement("th", null, "Tier"),
-              /* @__PURE__ */ React.createElement("th", null, "UniCoins")
-            )
-          ),
-          /* @__PURE__ */ React.createElement("tbody", null,
-            sorted.map((s, idx) => /* @__PURE__ */ React.createElement("tr", { key: s.id, className: s.id === me.id ? "lb-row-me" : "" },
-              /* @__PURE__ */ React.createElement("td", null, idx === 0 ? "\u{1F947}" : idx === 1 ? "\u{1F948}" : idx === 2 ? "\u{1F949}" : idx + 1),
-              /* @__PURE__ */ React.createElement("td", null,
-                /* @__PURE__ */ React.createElement("div", { className: "lb-name-cell" },
-                  /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 28 }),
-                  /* @__PURE__ */ React.createElement("span", null, s.name, s.id === me.id ? " (You)" : "")
-                )
-              ),
-              /* @__PURE__ */ React.createElement("td", null, s.dept),
-              /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(RankPill, { coins: s.coins })),
-              /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(CoinTag, { amount: s.coins }))
-            ))
-          )
-        )
-      )
-    );
-  }
-
-  function NotificationsPage({ notifications, onMarkRead }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "stack-list" },
-        notifications.map(n => /* @__PURE__ */ React.createElement("div", {
-          key: n.id,
-          className: "notif-card" + (!n.read ? " notif-unread" : ""),
-          onClick: () => onMarkRead(n.id)
-        },
-          /* @__PURE__ */ React.createElement("span", { className: "notif-icon" },
-            n.type === "coin" ? "\u{1FA99}" : n.type === "rank" ? "\u{1F48E}" : n.type === "badge" ? "\u{1F3C5}" : "\u{1F514}"
-          ),
-          /* @__PURE__ */ React.createElement("span", null, n.text),
-          !n.read && /* @__PURE__ */ React.createElement("span", { className: "notif-dot" })
-        )),
-        notifications.length === 0 && /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F514}", title: "No notifications", text: "You're all caught up!" })
-      )
-    );
-  }
-
-  function ProfilePage({ me }) {
-    const rank = getRank(me.coins);
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "profile-hero" },
-        /* @__PURE__ */ React.createElement(Avatar, { student: me, size: 72 }),
-        /* @__PURE__ */ React.createElement("div", null,
-          /* @__PURE__ */ React.createElement("h2", null, me.name),
-          /* @__PURE__ */ React.createElement("p", { className: "muted" }, me.dept, " \xB7 ", me.semester, " \xB7 ", me.university),
-          /* @__PURE__ */ React.createElement("div", { className: "chip-row", style: { marginTop: 8 } },
-            /* @__PURE__ */ React.createElement(RankPill, { coins: me.coins }),
-            /* @__PURE__ */ React.createElement(CoinTag, { amount: me.coins }),
-            /* @__PURE__ */ React.createElement("span", { className: "tag" }, "\u2B50 ", me.rating, " Rating"),
-            /* @__PURE__ */ React.createElement("span", { className: "tag" }, "\u{1F6E1}\uFE0F ", me.trust, "% Trust Score")
-          )
-        )
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "stat-row stat-row-wide" },
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Tasks Completed", value: me.stats.tasksCompleted }),
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Helped", value: me.stats.studentsHelped }),
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Taught", value: me.stats.studentsTaught }),
-        /* @__PURE__ */ React.createElement(StatBlock, { label: "Projects Joined", value: me.stats.projectsJoined })
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "panel" },
-        /* @__PURE__ */ React.createElement("h3", null, "Badges & Achievements"),
-        /* @__PURE__ */ React.createElement("div", { className: "badge-grid" },
-          BADGE_DEFS.map(b => {
-            const unlocked = me.badges.includes(b.key);
-            return /* @__PURE__ */ React.createElement("div", { key: b.key, className: "badge-card" + (!unlocked ? " badge-locked" : "") },
-              /* @__PURE__ */ React.createElement("div", { className: "badge-card-icon" }, b.icon),
-              /* @__PURE__ */ React.createElement("strong", null, b.name),
-              /* @__PURE__ */ React.createElement("span", { className: "muted", style: { fontSize: 11 } }, b.req)
-            );
-          })
-        )
-      )
-    );
-  }
-
-  function WalletPage({ me }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "wallet-balance-card" },
-        /* @__PURE__ */ React.createElement(SectionEyebrow, null, "UniCoin Balance"),
-        /* @__PURE__ */ React.createElement("div", { className: "wallet-balance" }, me.coins.toLocaleString(), " Coins"),
-        /* @__PURE__ */ React.createElement("p", { className: "wallet-note" }, "UniCoins measure your overall contributions to the peer exchange network. Earn coins by completing tasks and helping fellow students[cite: 2].")
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "panel" },
-        /* @__PURE__ */ React.createElement("h3", null, "How to Earn UniCoins"),
-        /* @__PURE__ */ React.createElement("div", { className: "earn-grid" },
-          /* @__PURE__ */ React.createElement("div", { className: "earn-row" }, /* @__PURE__ */ React.createElement("span", null, "Complete a Peer Task"), /* @__PURE__ */ React.createElement(CoinTag, { amount: 50 })),
-          /* @__PURE__ */ React.createElement("div", { className: "earn-row" }, /* @__PURE__ */ React.createElement("span", null, "Answer a Learning Request"), /* @__PURE__ */ React.createElement(CoinTag, { amount: 30 })),
-          /* @__PURE__ */ React.createElement("div", { className: "earn-row" }, /* @__PURE__ */ React.createElement("span", null, "Join & Contribute to a Project"), /* @__PURE__ */ React.createElement(CoinTag, { amount: 100 })),
-          /* @__PURE__ */ React.createElement("div", { className: "earn-row" }, /* @__PURE__ */ React.createElement("span", null, "Maintain 5-Star Rating Bonus"), /* @__PURE__ */ React.createElement(CoinTag, { amount: 25 }))
-        )
-      )
-    );
-  }
-
-  function SettingsPage({ darkMode, setDarkMode, setToast }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" },
-      /* @__PURE__ */ React.createElement("div", { className: "panel" },
-        /* @__PURE__ */ React.createElement("h3", null, "Preferences"),
-        /* @__PURE__ */ React.createElement("div", { className: "settings-row" },
-          /* @__PURE__ */ React.createElement("span", null, "Dark Theme"),
-          /* @__PURE__ */ React.createElement("button", {
-            className: "switch" + (darkMode ? " switch-on" : ""),
-            onClick: () => setDarkMode(!darkMode)
-          }, /* @__PURE__ */ React.createElement("div", { className: "switch-knob" }))
-        )
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "panel" },
-        /* @__PURE__ */ React.createElement("h3", null, "Account"),
-        /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", onClick: () => setToast("Settings saved.") }, "Save Preferences")
-      )
-    );
-  }
-
-  function PresentationMode({ onClose }) {
-    const [slide, setSlide] = useState(0);
-    const totalSlides = 10;
-
-    const nextSlide = () => setSlide(s => Math.min(s + 1, totalSlides - 1));
-    const prevSlide = () => setSlide(s => Math.max(s - 1, 0));
-
+  function Messages({ me, students, conversations, activeConvId, setActiveConvId, onSend }) {
+    const [draft, setDraft] = useState("");
+    const active = conversations.find((c) => c.id === activeConvId) || conversations[0];
+    const endRef = useRef(null);
     useEffect(() => {
-      const handleKeyDown = (e) => {
-        if (e.key === "ArrowRight") nextSlide();
-        if (e.key === "ArrowLeft") prevSlide();
-        if (e.key === "Escape") onClose();
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
-
-    return /* @__PURE__ */ React.createElement("div", { className: "present-wrap" },
-      /* @__PURE__ */ React.createElement("div", { className: "present-topbar" },
-        /* @__PURE__ */ React.createElement("div", { className: "brand" }, /* @__PURE__ */ React.createElement("span", { className: "brand-mark" }, "US"), /* @__PURE__ */ React.createElement("span", null, "UniSkill Exchange")),
-        /* @__PURE__ */ React.createElement("div", { className: "present-section-nav" },
-          Array.from({ length: totalSlides }).map((_, i) =>
-            /* @__PURE__ */ React.createElement("button", {
-              key: i,
-              className: "present-dot" + (i === slide ? " present-dot-active" : ""),
-              onClick: () => setSlide(i)
-            })
-          )
-        ),
-        /* @__PURE__ */ React.createElement("button", { className: "icon-btn", style: { color: "#fff" }, onClick: onClose }, "\u2715")
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "present-progress" },
-        /* @__PURE__ */ React.createElement("div", { className: "present-progress-fill", style: { width: `${((slide + 1) / totalSlides) * 100}%` } })
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "present-body" },
-        /* @__PURE__ */ React.createElement("div", { className: "present-slide-counter" }, `Slide ${slide + 1} of ${totalSlides}`),
-        /* @__PURE__ */ React.createElement("div", { className: "present-slide slide" },
-          slide === 0 && /* @__PURE__ */ React.createElement("div", { className: "slide-center" },
-            /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Project Presentation"),
-            /* @__PURE__ */ React.createElement("h1", null, "UniSkill Exchange"),
-            /* @__PURE__ */ React.createElement("p", { className: "slide-sub" }, "A Peer-to-Peer Skill Sharing & Collaboration Platform for University Students"),
-            /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "Empowering campus communities to learn, teach, complete tasks, and collaborate through shared knowledge and earned reputation.")
-          ),
-          slide === 1 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "The Problem"),
-            /* @__PURE__ */ React.createElement("div", { className: "problem-grid" },
-              /* @__PURE__ */ React.createElement("div", { className: "problem-card" },
-                /* @__PURE__ */ React.createElement("div", { className: "problem-icon" }, "\u{1F3AF}"),
-                /* @__PURE__ */ React.createElement("h4", null, "Isolated Expertise"),
-                /* @__PURE__ */ React.createElement("p", null, "Students struggle to find peers who possess specific technical or creative skills outside their immediate social circle.")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "problem-card" },
-                /* @__PURE__ */ React.createElement("div", { className: "problem-icon" }, "\u{1F4B0}"),
-                /* @__PURE__ */ React.createElement("h4", null, "High Tutoring Costs"),
-                /* @__PURE__ */ React.createElement("p", null, "Commercial tutoring platforms are expensive and lack context relative to specific university coursework.")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "problem-card" },
-                /* @__PURE__ */ React.createElement("div", { className: "problem-icon" }, "\u{1F91D}"),
-                /* @__PURE__ */ React.createElement("h4", null, "Lack of Team Matchmaking"),
-                /* @__PURE__ */ React.createElement("p", null, "Forming balanced project teams across different departments remains informal and inefficient.")
-              )
-            )
-          ),
-          slide === 2 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "The Solution"),
-            /* @__PURE__ */ React.createElement("div", { className: "hub-diagram" },
-              /* @__PURE__ */ React.createElement("div", { className: "hub-center" }, "UniSkill Exchange"),
-              /* @__PURE__ */ React.createElement("div", { className: "hub-modules" },
-                /* @__PURE__ */ React.createElement("div", { className: "hub-module" },
-                  /* @__PURE__ */ React.createElement("div", { className: "hub-module-icon" }, "\u{1F504}"),
-                  /* @__PURE__ */ React.createElement("strong", null, "Peer Exchange"),
-                  /* @__PURE__ */ React.createElement("span", null, "Direct skill matching between students")
-                ),
-                /* @__PURE__ */ React.createElement("div", { className: "hub-module" },
-                  /* @__PURE__ */ React.createElement("div", { className: "hub-module-icon" }, "\u{1F5C2}\uFE0F"),
-                  /* @__PURE__ */ React.createElement("strong", null, "Task Board"),
-                  /* @__PURE__ */ React.createElement("span", null, "Micro-tasks rewarded with UniCoins[cite: 2]")
-                ),
-                /* @__PURE__ */ React.createElement("div", { className: "hub-module" },
-                  /* @__PURE__ */ React.createElement("div", { className: "hub-module-icon" }, "\u{1F680}"),
-                  /* @__PURE__ */ React.createElement("strong", null, "Project Teaming"),
-                  /* @__PURE__ */ React.createElement("span", null, "Algorithmic role-based team matching")
-                )
-              )
-            )
-          ),
-          slide === 3 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Core Mechanism: Algorithmic Skill Matching"),
-            /* @__PURE__ */ React.createElement("div", { className: "match-demo" },
-              /* @__PURE__ */ React.createElement("div", { className: "match-card" },
-                /* @__PURE__ */ React.createElement("strong", null, "Student A (Plabon)[cite: 2]"),
-                /* @__PURE__ */ React.createElement("span", { className: "tag" }, "Can: Java, C, OOP[cite: 2]"),
-                /* @__PURE__ */ React.createElement("span", { className: "tag" }, "Wants: Python, AI[cite: 2]")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "match-center" },
-                /* @__PURE__ */ React.createElement("div", { className: "match-percent" }, "96%"),
-                /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Bidirectional Match Score")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "match-card" },
-                /* @__PURE__ */ React.createElement("strong", null, "Student B (Tanjim)[cite: 2]"),
-                /* @__PURE__ */ React.createElement("span", { className: "tag" }, "Can: Python, ML[cite: 2]"),
-                /* @__PURE__ */ React.createElement("span", { className: "tag" }, "Wants: Public Speaking[cite: 2]")
-              )
-            )
-          ),
-          slide === 4 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Economy & Gamification"),
-            /* @__PURE__ */ React.createElement("div", { className: "slide-center" },
-              /* @__PURE__ */ React.createElement("div", { className: "big-coin-counter" }, "\u{1FA99} UniCoin Tokenomics"),
-              /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "A non-monetary currency that quantifies value generated and drives engagement across campus."),
-              /* @__PURE__ */ React.createElement("div", { className: "rank-ladder" },
-                RANKS.map(r => /* @__PURE__ */ React.createElement("div", { key: r.key, className: "rank-ladder-card", style: { "--rank-color": r.color } },
-                  /* @__PURE__ */ React.createElement("div", { className: "rank-ladder-icon" }, r.icon),
-                  /* @__PURE__ */ React.createElement("strong", null, r.label),
-                  /* @__PURE__ */ React.createElement("span", null, `${r.min}+ Coins`)
-                ))
-              )
-            )
-          ),
-          slide === 5 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Task Lifecycle Management"),
-            /* @__PURE__ */ React.createElement("div", { className: "flow-diagram flow-horizontal" },
-              /* @__PURE__ */ React.createElement("div", { className: "flow-node" }, /* @__PURE__ */ React.createElement("span", { className: "flow-icon" }, "\u{1F4DD}"), /* @__PURE__ */ React.createElement("span", { className: "flow-label" }, "1. Post Task")),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-arrow" }, "\u2192"),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-node" }, /* @__PURE__ */ React.createElement("span", { className: "flow-icon" }, "\u{1F64B}"), /* @__PURE__ */ React.createElement("span", { className: "flow-label" }, "2. Peer Applies")),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-arrow" }, "\u2192"),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-node" }, /* @__PURE__ */ React.createElement("span", { className: "flow-icon" }, "\u2699\uFE0F"), /* @__PURE__ */ React.createElement("span", { className: "flow-label" }, "3. Execution")),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-arrow" }, "\u2192"),
-              /* @__PURE__ */ React.createElement("div", { className: "flow-node" }, /* @__PURE__ */ React.createElement("span", { className: "flow-icon" }, "\u{1FA99}"), /* @__PURE__ */ React.createElement("span", { className: "flow-label" }, "4. Coin Transfer"))
-            )
-          ),
-          slide === 6 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Technical Architecture"),
-            /* @__PURE__ */ React.createElement("div", { className: "tech-grid" },
-              /* @__PURE__ */ React.createElement("div", { className: "tech-row" }, /* @__PURE__ */ React.createElement("strong", null, "Frontend"), /* @__PURE__ */ React.createElement("span", null, "React 18, Dynamic CSS Utilities")),
-              /* @__PURE__ */ React.createElement("div", { className: "tech-row" }, /* @__PURE__ */ React.createElement("strong", null, "State Engine"), /* @__PURE__ */ React.createElement("span", null, "Reactive Custom Store Hooks")),
-              /* @__PURE__ */ React.createElement("div", { className: "tech-row" }, /* @__PURE__ */ React.createElement("strong", null, "UI Design"), /* @__PURE__ */ React.createElement("span", null, "Editorial Fraunces & Public Sans Typography")),
-              /* @__PURE__ */ React.createElement("div", { className: "tech-row" }, /* @__PURE__ */ React.createElement("strong", null, "Matching Core"), /* @__PURE__ */ React.createElement("span", null, "In-Memory Skill Overlap Matrix"))
-            )
-          ),
-          slide === 7 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Trust & Verification"),
-            /* @__PURE__ */ React.createElement("div", { className: "unique-grid" },
-              /* @__PURE__ */ React.createElement("div", { className: "unique-card" },
-                /* @__PURE__ */ React.createElement("div", { className: "unique-icon" }, "\u{1F393}"),
-                /* @__PURE__ */ React.createElement("h4", null, "University Verification"),
-                /* @__PURE__ */ React.createElement("p", null, "Restricted strictly to institutional email domains (.edu.bd) to maintain platform safety.")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "unique-card" },
-                /* @__PURE__ */ React.createElement("div", { className: "unique-icon" }, "\u{1F512}"),
-                /* @__PURE__ */ React.createElement("h4", null, "Escrow Mechanism"),
-                /* @__PURE__ */ React.createElement("p", null, "Coins are held securely until the task poster validates completed work.")
-              )
-            )
-          ),
-          slide === 8 && /* @__PURE__ */ React.createElement("div", null,
-            /* @__PURE__ */ React.createElement("h2", null, "Future Roadmap"),
-            /* @__PURE__ */ React.createElement("div", { className: "journey-grid" },
-              /* @__PURE__ */ React.createElement("div", { className: "journey-col" },
-                /* @__PURE__ */ React.createElement("h4", null, "Phase 1"),
-                /* @__PURE__ */ React.createElement("p", null, "Cross-campus scaling & automated certificate validation.")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "journey-col" },
-                /* @__PURE__ */ React.createElement("h4", null, "Phase 2"),
-                /* @__PURE__ */ React.createElement("p", null, "AI-driven skill path recommendations based on academic syllabi.")
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "journey-col" },
-                /* @__PURE__ */ React.createElement("h4", null, "Phase 3"),
-                /* @__PURE__ */ React.createElement("p", null, "Corporate recruiter portal for hiring top-ranked student helpers.")
-              )
-            )
-          ),
-          slide === 9 && /* @__PURE__ */ React.createElement("div", { className: "slide-center" },
-            /* @__PURE__ */ React.createElement("h1", { className: "final-title" }, "Thank You"),
-            /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "UniSkill Exchange — Empowering students to grow together."),
-            /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-lg", style: { marginTop: 24 }, onClick: onClose }, "Return to Interactive App")
-          )
-        )
-      ),
-      /* @__PURE__ */ React.createElement("div", { className: "present-nav" },
-        /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", onClick: prevSlide, disabled: slide === 0 }, "\u2190 Previous"),
-        /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Use Arrow Keys to Navigate"),
-        /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: nextSlide, disabled: slide === totalSlides - 1 }, "Next \u2192")
-      )
-    );
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [active && active.messages.length, activeConvId]);
+    return /* @__PURE__ */ React.createElement("div", { className: "chat-shell" }, /* @__PURE__ */ React.createElement("div", { className: "chat-list" }, conversations.map((c) => {
+      const other = studentById(students, c.withId);
+      const last = c.messages[c.messages.length - 1];
+      return /* @__PURE__ */ React.createElement("button", { key: c.id, className: "chat-list-item" + (active && active.id === c.id ? " active" : ""), onClick: () => setActiveConvId(c.id) }, /* @__PURE__ */ React.createElement(Avatar, { student: other, size: 38 }), /* @__PURE__ */ React.createElement("div", { className: "chat-list-info" }, /* @__PURE__ */ React.createElement("strong", null, other.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, last ? last.text : "No messages yet")));
+    })), /* @__PURE__ */ React.createElement("div", { className: "chat-panel" }, active ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", { className: "chat-panel-head" }, /* @__PURE__ */ React.createElement(Avatar, { student: studentById(students, active.withId), size: 34 }), /* @__PURE__ */ React.createElement("strong", null, studentById(students, active.withId).name)), /* @__PURE__ */ React.createElement("div", { className: "chat-messages" }, active.messages.map((m, i) => /* @__PURE__ */ React.createElement("div", { key: i, className: "chat-bubble" + (m.from === me.id ? " chat-bubble-me" : "") }, m.text)), /* @__PURE__ */ React.createElement("div", { ref: endRef })), /* @__PURE__ */ React.createElement("form", { className: "chat-input-row", onSubmit: (e) => {
+      e.preventDefault();
+      if (!draft.trim()) return;
+      onSend(active.id, draft);
+      setDraft("");
+    } }, /* @__PURE__ */ React.createElement("input", { value: draft, onChange: (e) => setDraft(e.target.value), placeholder: "Type a message..." }), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", type: "submit" }, "Send"))) : /* @__PURE__ */ React.createElement(EmptyState, { icon: "\u{1F4AC}", title: "No conversations yet", text: "Message a student from Discover to start chatting." })));
   }
-
-  function MainApp() {
-    const [view, setView] = useState("app"); // "landing", "auth", "app", "presentation"
+  function Leaderboard({ students, me }) {
+    const [tab, setTab] = useState("overall");
+    const sorted = [...students].sort((a, b) => b.coins - a.coins);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["overall", "This Month", "This Week", "Department"].map((t) => /* @__PURE__ */ React.createElement("button", { key: t, className: "chip" + (tab === t ? " chip-active" : ""), onClick: () => setTab(t) }, t === "overall" ? "Overall" : t))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("table", { className: "lb-table" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "#"), /* @__PURE__ */ React.createElement("th", null, "Student"), /* @__PURE__ */ React.createElement("th", null, "Department"), /* @__PURE__ */ React.createElement("th", null, "UniCoins"), /* @__PURE__ */ React.createElement("th", null, "Tasks"), /* @__PURE__ */ React.createElement("th", null, "Helped"), /* @__PURE__ */ React.createElement("th", null, "Rank"))), /* @__PURE__ */ React.createElement("tbody", null, sorted.map((s, i) => /* @__PURE__ */ React.createElement("tr", { key: s.id, className: s.id === me.id ? "lb-row-me" : "" }, /* @__PURE__ */ React.createElement("td", null, i < 3 ? ["\u{1F947}", "\u{1F948}", "\u{1F949}"][i] : i + 1), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("div", { className: "lb-name-cell" }, /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 30 }), s.name)), /* @__PURE__ */ React.createElement("td", { className: "muted" }, s.dept), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(CoinTag, { amount: s.coins })), /* @__PURE__ */ React.createElement("td", null, s.stats.tasksCompleted), /* @__PURE__ */ React.createElement("td", null, s.stats.studentsHelped), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(RankPill, { coins: s.coins, compact: true }))))))), /* @__PURE__ */ React.createElement("p", { className: "muted center-text" }, "The leaderboard recognizes students who actively contribute to the university community \u2014 it's about reputation, not money."));
+  }
+  function NotificationsPage({ notifications, onRead, setPage }) {
+    const ICONS = { task: "\u{1F5C2}\uFE0F", coin: "\u{1FA99}", message: "\u{1F4AC}", exchange: "\u{1F504}", rank: "\u{1F4C8}", badge: "\u{1F3C5}" };
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, notifications.map((n) => /* @__PURE__ */ React.createElement("button", { key: n.id, className: "notif-card" + (n.read ? "" : " notif-unread"), onClick: () => {
+      onRead(n.id);
+      setPage(n.target);
+    } }, /* @__PURE__ */ React.createElement("span", { className: "notif-icon" }, ICONS[n.type] || "\u{1F514}"), /* @__PURE__ */ React.createElement("span", null, n.text), !n.read && /* @__PURE__ */ React.createElement("span", { className: "notif-dot" })))));
+  }
+  function ProfilePage({ me, isEditing, setIsEditing, onSaveBio }) {
+    const rank = getRank(me.coins);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "profile-hero" }, /* @__PURE__ */ React.createElement(Avatar, { student: me, size: 84 }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h2", null, me.name), /* @__PURE__ */ React.createElement("p", { className: "muted" }, me.dept, " \xB7 ", me.semester, " \xB7 ", me.university), /* @__PURE__ */ React.createElement("div", { className: "student-card-meta" }, /* @__PURE__ */ React.createElement(RankPill, { coins: me.coins }), /* @__PURE__ */ React.createElement(CoinTag, { amount: me.coins }), /* @__PURE__ */ React.createElement("span", null, "\u2B50 ", me.rating, " (", me.reviews, " reviews)"), /* @__PURE__ */ React.createElement("span", null, "\u{1F6E1}\uFE0F ", me.trust, "% trust"))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", onClick: () => setIsEditing(!isEditing) }, isEditing ? "Done" : "Edit Profile")), /* @__PURE__ */ React.createElement("div", { className: "stat-row" }, /* @__PURE__ */ React.createElement(StatBlock, { label: "Tasks Completed", value: me.stats.tasksCompleted }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Helped", value: me.stats.studentsHelped }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Taught", value: me.stats.studentsTaught }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Projects Joined", value: me.stats.projectsJoined })), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Skills I Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, me.skillsCan.map((k) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: k.name }, k.name, " \xB7 ", k.level))), /* @__PURE__ */ React.createElement("h3", null, "Skills I Want To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, me.skillsWant.map((k) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-alt chip-static", key: k }, k)))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Badges"), /* @__PURE__ */ React.createElement("div", { className: "badge-grid" }, BADGE_DEFS.map((b) => {
+      const unlocked = me.badges.includes(b.key);
+      return /* @__PURE__ */ React.createElement("div", { key: b.key, className: "badge-card" + (unlocked ? "" : " badge-locked") }, /* @__PURE__ */ React.createElement("div", { className: "badge-card-icon" }, b.icon), /* @__PURE__ */ React.createElement("strong", null, b.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, b.req));
+    }))));
+  }
+  function WalletPage({ me, transactions }) {
+    const rank = getRank(me.coins);
+    const nr = nextRank(me.coins);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "wallet-balance-card" }, /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Current Balance"), /* @__PURE__ */ React.createElement("div", { className: "wallet-balance" }, "\u{1FA99} ", me.coins.toLocaleString()), /* @__PURE__ */ React.createElement("span", { className: "muted" }, "Total Earned: ", me.totalEarned.toLocaleString(), " UniCoins"), /* @__PURE__ */ React.createElement("p", { className: "wallet-note" }, "UniCoins are not real money \u2014 they represent your contribution and helpfulness within the university community.")), /* @__PURE__ */ React.createElement("div", { className: "rank-progress-card" }, /* @__PURE__ */ React.createElement("div", { className: "rank-progress-head" }, /* @__PURE__ */ React.createElement("span", null, rank.icon, " ", rank.label), nr && /* @__PURE__ */ React.createElement("span", { className: "muted" }, (nr.min - me.coins).toLocaleString(), " to ", nr.label)), /* @__PURE__ */ React.createElement("div", { className: "progress-bar" }, /* @__PURE__ */ React.createElement("div", { className: "progress-fill", style: { width: nr ? `${(me.coins - rank.min) / (nr.min - rank.min) * 100}%` : "100%" } }))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "How You Earn UniCoins"), /* @__PURE__ */ React.createElement("div", { className: "earn-grid" }, [["Complete a Task", 50], ["Help a Student", 20], ["Teaching Session", 30], ["Successful Project Collaboration", 100], ["Community Contribution", 10]].map(([label, amt]) => /* @__PURE__ */ React.createElement("div", { className: "earn-row", key: label }, /* @__PURE__ */ React.createElement("span", null, label), /* @__PURE__ */ React.createElement(CoinTag, { amount: amt }))))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Recent Transactions"), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, transactions.map((t, i) => /* @__PURE__ */ React.createElement("div", { className: "tx-row", key: i }, /* @__PURE__ */ React.createElement("span", null, t.label), /* @__PURE__ */ React.createElement("span", { className: "tx-amount" }, "+", t.amount))))));
+  }
+  function SettingsPage({ darkMode, setDarkMode, onLogout }) {
+    const [notifOn, setNotifOn] = useState(true);
+    const [privateProfile, setPrivateProfile] = useState(false);
+    return /* @__PURE__ */ React.createElement("div", { className: "page-stack" }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Appearance"), /* @__PURE__ */ React.createElement("div", { className: "settings-row" }, /* @__PURE__ */ React.createElement("span", null, "Dark Mode"), /* @__PURE__ */ React.createElement("button", { className: "switch" + (darkMode ? " switch-on" : ""), onClick: () => setDarkMode(!darkMode) }, /* @__PURE__ */ React.createElement("span", { className: "switch-knob" })))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Notifications"), /* @__PURE__ */ React.createElement("div", { className: "settings-row" }, /* @__PURE__ */ React.createElement("span", null, "Push Notifications"), /* @__PURE__ */ React.createElement("button", { className: "switch" + (notifOn ? " switch-on" : ""), onClick: () => setNotifOn(!notifOn) }, /* @__PURE__ */ React.createElement("span", { className: "switch-knob" })))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Privacy"), /* @__PURE__ */ React.createElement("div", { className: "settings-row" }, /* @__PURE__ */ React.createElement("span", null, "Private Profile"), /* @__PURE__ */ React.createElement("button", { className: "switch" + (privateProfile ? " switch-on" : ""), onClick: () => setPrivateProfile(!privateProfile) }, /* @__PURE__ */ React.createElement("span", { className: "switch-knob" })))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("h3", null, "Account"), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", onClick: onLogout }, "Log out")));
+  }
+  function FlowDiagram({ items, horizontal }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "flow-diagram" + (horizontal ? " flow-horizontal" : "") }, items.map(([icon, label], i, arr) => /* @__PURE__ */ React.createElement(React.Fragment, { key: label }, /* @__PURE__ */ React.createElement("div", { className: "flow-node" }, /* @__PURE__ */ React.createElement("div", { className: "flow-icon" }, icon), /* @__PURE__ */ React.createElement("div", { className: "flow-label" }, label)), i < arr.length - 1 && /* @__PURE__ */ React.createElement("div", { className: "flow-arrow" }, horizontal ? "\u2192" : "\u2193"))));
+  }
+  function ProblemCard({ icon, title, text, flow }) {
+    return /* @__PURE__ */ React.createElement("div", { className: "problem-card" }, /* @__PURE__ */ React.createElement("div", { className: "problem-icon" }, icon), /* @__PURE__ */ React.createElement("h4", null, title), /* @__PURE__ */ React.createElement("p", null, text), /* @__PURE__ */ React.createElement("div", { className: "problem-flow" }, flow));
+  }
+  const SLIDES = [
+    {
+      section: "Overview",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "UniSkill Exchange \xB7 Project Demo"), /* @__PURE__ */ React.createElement("h1", null, "UniSkill Exchange"), /* @__PURE__ */ React.createElement("h3", { className: "slide-sub" }, "Learn. Teach. Help. Collaborate. Earn Reputation."), /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "UniSkill Exchange is a university-based peer-to-peer platform that connects students through their skills, learning goals, tasks, projects, and community contributions."), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u{1F393}", "Student Skills"], ["\u{1F50D}", "Skill Discovery"], ["\u{1F91D}", "Learning & Helping"], ["\u{1F5C2}\uFE0F", "Tasks & Collaboration"], ["\u{1FA99}", "UniCoins"], ["\u{1F4C8}", "Reputation"], ["\u{1F6E1}\uFE0F", "Trusted University Community"]] }))
+    },
+    {
+      section: "Problem",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "The Problem"), /* @__PURE__ */ React.createElement("h2", null, "Five problems every campus has"), /* @__PURE__ */ React.createElement("div", { className: "problem-grid" }, /* @__PURE__ */ React.createElement(ProblemCard, { icon: "\u{1FAE5}", title: "Hidden Skills", text: "Many students have valuable skills, but others don't know who is good at what.", flow: "Student \u2192 Skill \u2192 Hidden" }), /* @__PURE__ */ React.createElement(ProblemCard, { icon: "\u2753", title: "Difficulty Finding Help", text: "A student may need help with programming, design or presentation, but doesn't know who to ask.", flow: "Student with Problem \u2192 \u2753 \u2192 Can't Find the Right Person" }), /* @__PURE__ */ React.createElement(ProblemCard, { icon: "\u{1F465}", title: "Lack of Peer Learning", text: "Students learn better when they can talk directly with someone from their own university.", flow: "Learner \u2192 Missing Mentor" }), /* @__PURE__ */ React.createElement(ProblemCard, { icon: "\u{1F648}", title: "No Recognition for Helping", text: "Students who regularly help others have no visible way to show their contribution.", flow: "Helpful Student \u2192 Helps Others \u2192 No Recognition" }), /* @__PURE__ */ React.createElement(ProblemCard, { icon: "\u{1F9E9}", title: "Difficulty Finding Teammates", text: "Students struggle to find teammates with the right technical or creative skills.", flow: "Project Idea \u2192 Missing Skills \u2192 Difficult Team Formation" })), /* @__PURE__ */ React.createElement("p", { className: "slide-callout" }, "UniSkill Exchange brings all of these problems into one university-focused platform."))
+    },
+    {
+      section: "Solution",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "The Solution"), /* @__PURE__ */ React.createElement("h2", null, "One University. Many Skills. One Connected Community."), /* @__PURE__ */ React.createElement("div", { className: "hub-diagram" }, /* @__PURE__ */ React.createElement("div", { className: "hub-center" }, "UniSkill", /* @__PURE__ */ React.createElement("br", null), "Exchange"), /* @__PURE__ */ React.createElement("div", { className: "hub-modules" }, [["\u{1F4DA}", "Learn", "Students find people who can teach them."], ["\u{1F3A4}", "Teach", "Students share skills they are good at."], ["\u{1F91D}", "Help", "Students help others solve problems."], ["\u{1F5C2}\uFE0F", "Tasks", "Students post and complete community tasks."], ["\u{1F680}", "Collaborate", "Students form teams and work on projects."], ["\u{1F4C8}", "Reputation", "Students earn Coins, Badges, Ratings and Ranks."]].map(([icon, title, text]) => /* @__PURE__ */ React.createElement("div", { className: "hub-module", key: title }, /* @__PURE__ */ React.createElement("div", { className: "hub-module-icon" }, icon), /* @__PURE__ */ React.createElement("strong", null, title), /* @__PURE__ */ React.createElement("span", null, text))))))
+    },
+    {
+      section: "How It Works",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "How It Works"), /* @__PURE__ */ React.createElement("h2", null, "A 7-step journey"), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u{1F393}", "Join Your University"], ["\u{1F9E9}", "Build Your Skill Profile"], ["\u{1F50D}", "Discover Students"], ["\u{1F4AC}", "Connect"], ["\u{1F91D}", "Learn / Help / Collaborate"], ["\u{1F5C2}\uFE0F", "Complete Tasks"], ["\u{1F4C8}", "Earn Reputation"]] }))
+    },
+    {
+      section: "Skill Exchange",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Our Signature Feature"), /* @__PURE__ */ React.createElement("h2", null, "Skill Exchange"), /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "Students can exchange knowledge with each other instead of only asking for help."), /* @__PURE__ */ React.createElement("div", { className: "match-demo" }, /* @__PURE__ */ React.createElement("div", { className: "match-card" }, /* @__PURE__ */ React.createElement(Avatar, { student: STUDENTS[0], size: 54 }), /* @__PURE__ */ React.createElement("strong", null, "Plabon"), /* @__PURE__ */ React.createElement("div", { className: "muted" }, "Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["Java", "OOP", "C Programming"].map((s) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: s }, s))), /* @__PURE__ */ React.createElement("div", { className: "muted" }, "Wants To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["Flutter", "Dart"].map((s) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-alt chip-static", key: s }, s)))), /* @__PURE__ */ React.createElement("div", { className: "match-center" }, /* @__PURE__ */ React.createElement("div", { className: "match-percent" }, "\u{1F504} 92%"), /* @__PURE__ */ React.createElement("span", null, "Skill Match"), /* @__PURE__ */ React.createElement("div", { className: "match-swap" }, /* @__PURE__ */ React.createElement("span", null, "Plabon teaches Java"), /* @__PURE__ */ React.createElement("span", null, "\u2195"), /* @__PURE__ */ React.createElement("span", null, "Rahim teaches Flutter"))), /* @__PURE__ */ React.createElement("div", { className: "match-card" }, /* @__PURE__ */ React.createElement(Avatar, { student: STUDENTS[1], size: 54 }), /* @__PURE__ */ React.createElement("strong", null, "Rahim"), /* @__PURE__ */ React.createElement("div", { className: "muted" }, "Can Help With"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["Flutter", "Dart", "Firebase"].map((s) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: s }, s))), /* @__PURE__ */ React.createElement("div", { className: "muted" }, "Wants To Learn"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["Java", "OOP"].map((s) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-alt chip-static", key: s }, s))))), /* @__PURE__ */ React.createElement("p", { className: "slide-callout" }, "One student's strength becomes another student's learning opportunity."), /* @__PURE__ */ React.createElement("div", { className: "two-modes" }, /* @__PURE__ */ React.createElement("div", { className: "mode-card" }, /* @__PURE__ */ React.createElement("strong", null, "\u{1F504} Mutual Skill Exchange"), /* @__PURE__ */ React.createElement("p", null, "Two students trade knowledge \u2014 each teaches what the other wants to learn.")), /* @__PURE__ */ React.createElement("div", { className: "mode-card" }, /* @__PURE__ */ React.createElement("strong", null, "\u27A1\uFE0F One-Way Peer Learning"), /* @__PURE__ */ React.createElement("p", null, "Student A knows Photoshop. Student B wants to learn it. Student A simply offers help."))))
+    },
+    {
+      section: "Learning Requests",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Learning Requests"), /* @__PURE__ */ React.createElement("h2", null, "Ask openly, get matched with a peer"), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u{1F4DD}", '"I want to learn Flutter"'], ["\u{1F440}", "Other students see the request"], ["\u{1F64B}", "Someone offers help"], ["\u{1F4AC}", "Chat begins"], ["\u{1F393}", "Peer learning happens"]] }), /* @__PURE__ */ React.createElement("p", { className: "slide-callout" }, "Students can publicly express what they want to learn and connect with peers who have the right expertise."))
+    },
+    {
+      section: "Task Marketplace",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Task Marketplace"), /* @__PURE__ */ React.createElement("h2", null, "From posted task to completed contribution"), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u{1F4DD}", "Post Task"], ["\u{1F64B}", "Student Applies"], ["\u2705", "Owner Accepts"], ["\u2699\uFE0F", "In Progress"], ["\u{1F4E4}", "Helper Submits Work"], ["\u{1F50D}", "Owner Reviews"], ["\u{1F44D}", "Owner Approves"], ["\u{1FA99}", "+50 UniCoins"], ["\u{1F4C8}", "Reputation Updated"]] }))
+    },
+    {
+      section: "UniCoins",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "UniCoins"), /* @__PURE__ */ React.createElement("h2", null, "Contribution Reputation \u2014 Not Real Money"), /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "UniCoins represent a student's contribution and helpfulness within the university community."), /* @__PURE__ */ React.createElement("div", { className: "earn-grid earn-grid-wide" }, [["Complete a Task", 50], ["Help a Student", 20], ["Teaching Session", 30], ["Successful Project Collaboration", 100], ["Community Contribution", 10]].map(([label, amt]) => /* @__PURE__ */ React.createElement("div", { className: "earn-row", key: label }, /* @__PURE__ */ React.createElement("span", null, label), /* @__PURE__ */ React.createElement(CoinTag, { amount: amt })))), /* @__PURE__ */ React.createElement("div", { className: "big-coin-counter" }, "\u{1FA99} 3,250 UniCoins"), /* @__PURE__ */ React.createElement(FlowDiagram, { horizontal: true, items: [["\u{1F91D}", "Contribution"], ["\u{1FA99}", "UniCoins"], ["\u{1F4C8}", "Reputation"], ["\u{1F3C5}", "Rank"], ["\u{1F6E1}\uFE0F", "Trust"]] }))
+    },
+    {
+      section: "Ranks",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Reputation & Rank"), /* @__PURE__ */ React.createElement("h2", null, "Rank is a visible representation of contribution"), /* @__PURE__ */ React.createElement("div", { className: "rank-ladder" }, RANKS.map((r) => /* @__PURE__ */ React.createElement("div", { className: "rank-ladder-card", key: r.key, style: { "--rank-color": r.color } }, /* @__PURE__ */ React.createElement("div", { className: "rank-ladder-icon" }, r.icon), /* @__PURE__ */ React.createElement("strong", null, r.label), /* @__PURE__ */ React.createElement("span", null, r.min.toLocaleString(), r.max === Infinity ? "+" : "\u2013" + r.max.toLocaleString())))), /* @__PURE__ */ React.createElement("div", { className: "sample-profile-card" }, /* @__PURE__ */ React.createElement(Avatar, { student: STUDENTS[0], size: 56 }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, "Plabon Ahmed"), /* @__PURE__ */ React.createElement("div", { className: "student-card-meta" }, /* @__PURE__ */ React.createElement("span", null, "\u{1F48E} Platinum"), /* @__PURE__ */ React.createElement("span", null, "\u{1FA99} 3,250"), /* @__PURE__ */ React.createElement("span", null, "\u2B50 4.9"), /* @__PURE__ */ React.createElement("span", null, "\u{1F6E1}\uFE0F 96%")))))
+    },
+    {
+      section: "Trust & Rating",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Building Trust"), /* @__PURE__ */ React.createElement("h2", null, "Trust makes the community reliable"), /* @__PURE__ */ React.createElement("div", { className: "stat-row stat-row-wide" }, /* @__PURE__ */ React.createElement(StatBlock, { label: "Rating", value: "\u2B50 4.9 / 5" }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Trust Score", value: "\u{1F6E1}\uFE0F 96%" }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Tasks Completed", value: "\u2705 87" }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Helped", value: "\u{1F91D} 42" }), /* @__PURE__ */ React.createElement(StatBlock, { label: "Students Taught", value: "\u{1F4DA} 16" })), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u2705", "Task Completed"], ["\u{1F50D}", "Owner Reviews Work"], ["\u2B50", "Rating & Review"], ["\u{1F6E1}\uFE0F", "Trust Score Updates"], ["\u{1F4C8}", "Community Reputation Improves"]] }))
+    },
+    {
+      section: "Badges",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Badges & Achievements"), /* @__PURE__ */ React.createElement("h2", null, "Recognition for meaningful contribution"), /* @__PURE__ */ React.createElement("div", { className: "badge-grid" }, BADGE_DEFS.map((b) => /* @__PURE__ */ React.createElement("div", { className: "badge-card", key: b.key }, /* @__PURE__ */ React.createElement("div", { className: "badge-card-icon" }, b.icon), /* @__PURE__ */ React.createElement("strong", null, b.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, b.req)))))
+    },
+    {
+      section: "Leaderboard",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "University Contribution Leaderboard"), /* @__PURE__ */ React.createElement("h2", null, "Recognizing top contributors"), /* @__PURE__ */ React.createElement("div", { className: "stack-list" }, [...STUDENTS].sort((a, b) => b.coins - a.coins).slice(0, 3).map((s, i) => /* @__PURE__ */ React.createElement("div", { className: "mini-student-row", key: s.id }, /* @__PURE__ */ React.createElement("span", { className: "lb-rank" }, ["\u{1F947}", "\u{1F948}", "\u{1F949}"][i]), /* @__PURE__ */ React.createElement(Avatar, { student: s, size: 40 }), /* @__PURE__ */ React.createElement("div", { className: "mini-student-info" }, /* @__PURE__ */ React.createElement("strong", null, s.name), /* @__PURE__ */ React.createElement("span", { className: "muted" }, s.dept)), /* @__PURE__ */ React.createElement(CoinTag, { amount: s.coins }), /* @__PURE__ */ React.createElement(RankPill, { coins: s.coins, compact: true })))), /* @__PURE__ */ React.createElement("p", { className: "slide-callout" }, "The leaderboard recognizes students who actively contribute to the university community."))
+    },
+    {
+      section: "Projects",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Project Collaboration"), /* @__PURE__ */ React.createElement("h2", null, "Finding teammates by actual skill"), /* @__PURE__ */ React.createElement(FlowDiagram, { items: [["\u{1F4A1}", "Project Idea"], ["\u{1F9E9}", "Required Skills"], ["\u{1F3AF}", "Skill-Based Recommendations"], ["\u{1F465}", "Team Formation"], ["\u{1F680}", "Collaboration"], ["\u2705", "Project Completion"]] }))
+    },
+    {
+      section: "Chat",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Chat & Communication"), /* @__PURE__ */ React.createElement("h2", null, "Everything happens without leaving the platform"), /* @__PURE__ */ React.createElement("div", { className: "chat-demo" }, /* @__PURE__ */ React.createElement("div", { className: "chat-bubble" }, "Hi Rahim, I saw that you know Flutter."), /* @__PURE__ */ React.createElement("div", { className: "chat-bubble chat-bubble-me" }, "Yes, I can help you with the basics."), /* @__PURE__ */ React.createElement("div", { className: "chat-bubble" }, "I can help you with Java OOP in return.")), /* @__PURE__ */ React.createElement("div", { className: "chip-row center-row" }, ["\u{1F4AC} One-to-One Chat", "\u{1F465} Group Chat", "\u{1F4CB} Task Chat", "\u{1F91D} Project Chat"].map((t) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: t }, t))))
+    },
+    {
+      section: "Ecosystem",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "How Everything Connects"), /* @__PURE__ */ React.createElement("h2", null, "The complete ecosystem"), /* @__PURE__ */ React.createElement("div", { className: "ecosystem-diagram" }, /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node eco-top" }, "University Student")), /* @__PURE__ */ React.createElement("div", { className: "eco-row eco-pair" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Skills I Have"), /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Skills I Want")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node eco-highlight" }, "Skill Matching")), /* @__PURE__ */ React.createElement("div", { className: "eco-row eco-pair" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Learn"), /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Teach")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node eco-highlight" }, "Chat")), /* @__PURE__ */ React.createElement("div", { className: "eco-row eco-pair" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Tasks"), /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Projects")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node eco-highlight" }, "Collaborate")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Complete Work")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Earn UniCoins")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Build Reputation")), /* @__PURE__ */ React.createElement("div", { className: "eco-row eco-pair" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Badges"), /* @__PURE__ */ React.createElement("div", { className: "eco-node" }, "Rank")), /* @__PURE__ */ React.createElement("div", { className: "eco-row" }, /* @__PURE__ */ React.createElement("div", { className: "eco-node eco-top" }, "Trusted Community"))))
+    },
+    {
+      section: "User Journey",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "A Day in the Life"), /* @__PURE__ */ React.createElement("h2", null, "Karim's story"), /* @__PURE__ */ React.createElement("div", { className: "journey-grid" }, /* @__PURE__ */ React.createElement("div", { className: "journey-col" }, /* @__PURE__ */ React.createElement("h4", null, "\u{1F305} Morning"), /* @__PURE__ */ React.createElement("p", null, "Karim wants to learn Flutter and creates a Learning Request.")), /* @__PURE__ */ React.createElement("div", { className: "journey-col" }, /* @__PURE__ */ React.createElement("h4", null, "\u2600\uFE0F Afternoon"), /* @__PURE__ */ React.createElement("p", null, "Rahim sees the request and offers help. They start chatting.")), /* @__PURE__ */ React.createElement("div", { className: "journey-col" }, /* @__PURE__ */ React.createElement("h4", null, "\u{1F319} Evening"), /* @__PURE__ */ React.createElement("p", null, "Karim needs Java help too. Plabon helps \u2014 and earns UniCoins. Karim learns Java. Both build reputation."))), /* @__PURE__ */ React.createElement(FlowDiagram, { horizontal: true, items: [["\u{1F4DA}", "Learn"], ["\u{1F91D}", "Help"], ["\u{1F680}", "Collaborate"], ["\u2705", "Contribute"], ["\u{1F4C8}", "Earn Reputation"], ["\u{1F501}", "Help Again"]] }))
+    },
+    {
+      section: "Why Unique",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "What Makes It Different"), /* @__PURE__ */ React.createElement("h2", null, "Seven ideas working as one ecosystem"), /* @__PURE__ */ React.createElement("div", { className: "unique-grid" }, [["\u{1F393}", "University-Focused", "Built specifically for students within the same university community."], ["\u{1F9E9}", "Skill-Based Discovery", "Find people based on what they know and what they want to learn."], ["\u{1F504}", "Mutual Skill Exchange", "Students can teach each other mutually, not just one-way help."], ["\u{1F4DA}", "Peer Learning", "Students learn better from peers who understand their context."], ["\u{1F5C2}\uFE0F", "Task Collaboration", "Learning and practical collaboration exist in the same platform."], ["\u{1F4C8}", "Contribution-Based Reputation", "Students earn recognition for helping others, not for spending money."], ["\u{1F680}", "Skill-Based Team Formation", "Students can find project teammates based on actual skills."]].map(([icon, title, text]) => /* @__PURE__ */ React.createElement("div", { className: "unique-card", key: title }, /* @__PURE__ */ React.createElement("div", { className: "unique-icon" }, icon), /* @__PURE__ */ React.createElement("strong", null, title), /* @__PURE__ */ React.createElement("p", null, text)))))
+    },
+    {
+      section: "Future Scope",
+      render: () => /* @__PURE__ */ React.createElement("div", { className: "slide" }, /* @__PURE__ */ React.createElement(SectionEyebrow, null, "Future Production Version"), /* @__PURE__ */ React.createElement("h2", null, "This prototype uses simulated local data"), /* @__PURE__ */ React.createElement("div", { className: "tech-grid" }, [["Frontend", "React / TypeScript"], ["Backend", "Future Firebase"], ["Database", "Future Firestore"], ["Authentication", "Future Firebase Auth"], ["Storage", "Future Firebase Storage"], ["Notifications", "Future Firebase Cloud Messaging"]].map(([k, v]) => /* @__PURE__ */ React.createElement("div", { className: "tech-row", key: k }, /* @__PURE__ */ React.createElement("span", null, k), /* @__PURE__ */ React.createElement("strong", null, v)))), /* @__PURE__ */ React.createElement("h3", null, "Planned Future Features"), /* @__PURE__ */ React.createElement("div", { className: "chip-row" }, ["Real university email verification", "Real-time chat", "File sharing", "Push notifications", "Persistent profiles", "Advanced skill matching", "Recommendation system", "Secure server-side UniCoin management", "Admin dashboard", "University-level moderation"].map((f) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: f }, f))))
+    },
+    {
+      section: "Summary",
+      render: (onEnterApp) => /* @__PURE__ */ React.createElement("div", { className: "slide slide-center" }, /* @__PURE__ */ React.createElement("h1", { className: "final-title" }, "One University.", /* @__PURE__ */ React.createElement("br", null), "Many Skills.", /* @__PURE__ */ React.createElement("br", null), "One Community."), /* @__PURE__ */ React.createElement("p", { className: "slide-lead" }, "UniSkill Exchange turns individual student skills into collective university knowledge."), /* @__PURE__ */ React.createElement("div", { className: "chip-row center-row" }, ["Learn", "Teach", "Help", "Collaborate", "Contribute", "Earn Reputation"].map((t) => /* @__PURE__ */ React.createElement("span", { className: "chip chip-static", key: t }, t))), /* @__PURE__ */ React.createElement("div", { className: "landing-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-lg", onClick: onEnterApp }, "\u{1F680} Enter Interactive App")))
+    }
+  ];
+  function PresentationMode({ onExit, onEnterApp }) {
+    const [i, setI] = useState(0);
+    const [fullscreen, setFullscreen] = useState(false);
+    const wrapRef = useRef(null);
+    useEffect(() => {
+      function onKey(e) {
+        if (e.key === "ArrowRight") setI((v) => Math.min(SLIDES.length - 1, v + 1));
+        if (e.key === "ArrowLeft") setI((v) => Math.max(0, v - 1));
+        if (e.key === "Escape" && document.fullscreenElement) document.exitFullscreen();
+      }
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }, []);
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        wrapRef.current.requestFullscreen?.();
+        setFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setFullscreen(false);
+      }
+    }
+    const slide = SLIDES[i];
+    return /* @__PURE__ */ React.createElement("div", { className: "present-wrap", ref: wrapRef }, /* @__PURE__ */ React.createElement("div", { className: "present-topbar" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-ghost btn-sm", onClick: onExit }, "\u2190 Exit Demo"), /* @__PURE__ */ React.createElement("div", { className: "present-section-nav" }, SLIDES.map((s, idx) => /* @__PURE__ */ React.createElement("button", { key: idx, title: s.section, className: "present-dot" + (idx === i ? " present-dot-active" : ""), onClick: () => setI(idx) }))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline btn-sm", onClick: toggleFullscreen }, fullscreen ? "Exit Fullscreen" : "\u26F6 Fullscreen")), /* @__PURE__ */ React.createElement("div", { className: "present-progress" }, /* @__PURE__ */ React.createElement("div", { className: "present-progress-fill", style: { width: `${(i + 1) / SLIDES.length * 100}%` } })), /* @__PURE__ */ React.createElement("div", { className: "present-body" }, /* @__PURE__ */ React.createElement("div", { className: "present-slide-counter" }, String(i + 1).padStart(2, "0"), " / ", String(SLIDES.length).padStart(2, "0"), " \xB7 ", slide.section), /* @__PURE__ */ React.createElement("div", { className: "present-slide" }, slide.render(onEnterApp))), /* @__PURE__ */ React.createElement("div", { className: "present-nav" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-outline", disabled: i === 0, onClick: () => setI(i - 1) }, "\u2190 Previous"), /* @__PURE__ */ React.createElement("span", { className: "muted" }, slide.section), i === SLIDES.length - 1 ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: onEnterApp }, "Enter Interactive Demo \u{1F680}") : /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => setI(i + 1) }, "Next \u2192")));
+  }
+  function App() {
+    const [mode, setMode] = useState("landing");
     const [page, setPage] = useState("dashboard");
     const [darkMode, setDarkMode] = useState(false);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
-    const [toast, setToast] = useState(null);
-    const [profileModalStudent, setProfileModalStudent] = useState(null);
-
+    const [toastMsg, setToastMsg] = useState(null);
     const [students, setStudents] = useState(STUDENTS);
     const [tasks, setTasks] = useState(TASKS);
     const [requests, setRequests] = useState(LEARNING_REQUESTS);
     const [projects, setProjects] = useState(PROJECTS);
     const [conversations, setConversations] = useState(CONVERSATIONS);
     const [notifications, setNotifications] = useState(NOTIFICATIONS);
-
-    const me = students.find(s => s.id === CURRENT_USER_ID);
-
-    const triggerToast = (msg) => {
-      setToast(msg);
-      setTimeout(() => setToast(null), 3000);
-    };
-
-    const handleAddCanSkill = (name, level) => {
-      if (me.skillsCan.some(s => s.name === name)) return triggerToast("Skill already added");
-      const updated = students.map(s => s.id === me.id ? { ...s, skillsCan: [...s.skillsCan, { name, level }] } : s);
-      setStudents(updated);
-      triggerToast("Skill added!");
-    };
-
-    const handleRemoveCanSkill = (index) => {
-      const updated = students.map(s => s.id === me.id ? { ...s, skillsCan: s.skillsCan.filter((_, i) => i !== index) } : s);
-      setStudents(updated);
-      triggerToast("Skill removed.");
-    };
-
-    const handleAddWantSkill = (name) => {
-      if (me.skillsWant.includes(name)) return triggerToast("Skill already in wishlist");
-      const updated = students.map(s => s.id === me.id ? { ...s, skillsWant: [...s.skillsWant, name] } : s);
-      setStudents(updated);
-      triggerToast("Skill added to wishlist!");
-    };
-
-    const handleRemoveWantSkill = (index) => {
-      const updated = students.map(s => s.id === me.id ? { ...s, skillsWant: s.skillsWant.filter((_, i) => i !== index) } : s);
-      setStudents(updated);
-      triggerToast("Skill removed from wishlist.");
-    };
-
-    const handleCreateTask = (newTaskData) => {
-      const newTask = {
-        id: tasks.length + 1,
-        ...newTaskData,
-        ownerId: me.id,
-        status: "open",
-        applicants: [],
-        helperId: null
-      };
-      setTasks([newTask, ...tasks]);
-    };
-
-    const handleApplyTask = (taskId) => {
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: "in_progress", helperId: me.id, applicants: [...t.applicants, me.id] } : t));
-    };
-
-    const handleUpdateTaskStatus = (taskId, newStatus) => {
-      setTasks(tasks.map(t => {
-        if (t.id === taskId) {
-          if (newStatus === "completed" && t.status !== "completed") {
-            const reward = t.reward;
-            setStudents(students.map(s => {
-              if (s.id === t.helperId) return { ...s, coins: s.coins + reward };
-              return s;
-            }));
-          }
-          return { ...t, status: newStatus };
-        }
-        return t;
-      }));
-    };
-
-    const handleCreateRequest = (reqData) => {
-      const newReq = {
-        id: requests.length + 1,
-        ...reqData,
-        posterId: me.id,
-        responses: []
-      };
-      setRequests([newReq, ...requests]);
-    };
-
-    const handleRespondRequest = (reqId, replyText) => {
-      setRequests(requests.map(r => r.id === reqId ? { ...r, responses: [...r.responses, { studentId: me.id, text: replyText }] } : r));
-    };
-
-    const handleSendMessage = (convId, text) => {
-      setConversations(conversations.map(c => c.id === convId ? { ...c, messages: [...c.messages, { from: me.id, text }] } : c));
-    };
-
-    const handleStartConversation = (targetStudent) => {
-      let conv = conversations.find(c => c.withId === targetStudent.id);
-      if (!conv) {
-        conv = { id: conversations.length + 1, withId: targetStudent.id, messages: [] };
-        setConversations([...conversations, conv]);
-      }
-      setPage("messages");
-    };
-
-    const handleAuthComplete = ({ form, canTeach, wantLearn }) => {
-      const newUser = {
-        id: students.length + 1,
-        name: form.name || "New Student",
-        dept: form.dept,
-        semester: form.semester || "1st Semester",
-        university: "Gazipur Digital University",
-        avatar: (form.name || "NS").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2),
-        color: "#1F4D3A",
-        coins: 100,
-        totalEarned: 100,
-        rating: 5.0,
-        reviews: 0,
-        trust: 100,
-        skillsCan: canTeach.map(s => ({ name: s, level: "Intermediate" })),
-        skillsWant: wantLearn,
-        stats: { tasksCompleted: 0, studentsHelped: 0, studentsTaught: 0, projectsJoined: 0 },
-        badges: ["first"]
-      };
-      setStudents([newUser, ...students]);
-      setView("app");
-      setPage("dashboard");
-      triggerToast("Account created! Welcome to UniSkill Exchange[cite: 2].");
-    };
-
+    const [transactions, setTransactions] = useState([
+      { label: "Completed Java Task", amount: 50 },
+      { label: "Teaching Session", amount: 30 },
+      { label: "Project Collaboration", amount: 100 },
+      { label: "Helped a Student", amount: 20 }
+    ]);
+    const [activeConvId, setActiveConvId] = useState(1);
+    const [profileModalStudent, setProfileModalStudent] = useState(null);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const me = students.find((s) => s.id === CURRENT_USER_ID);
     useEffect(() => {
-      if (darkMode) document.body.classList.add("theme-dark");
-      else document.body.classList.remove("theme-dark");
-    }, [darkMode]);
-
-    if (view === "landing") {
-      return /* @__PURE__ */ React.createElement(Landing, {
-        onEnterAuth: () => setView("auth"),
-        onDemoLogin: () => { setView("app"); setPage("dashboard"); },
-        onOpenPresentation: () => setView("presentation")
-      });
+      if (!toastMsg) return;
+      const t = setTimeout(() => setToastMsg(null), 2600);
+      return () => clearTimeout(t);
+    }, [toastMsg]);
+    function updateMe(patch) {
+      setStudents((prev) => prev.map((s) => s.id === CURRENT_USER_ID ? { ...s, ...patch } : s));
     }
-
-    if (view === "auth") {
-      return /* @__PURE__ */ React.createElement(AuthFlow, {
-        onComplete: handleAuthComplete,
-        onBack: () => setView("landing")
-      });
+    function pushNotification(text, type, target) {
+      setNotifications((prev) => [{ id: Date.now(), text, type, read: false, target }, ...prev]);
     }
-
-    if (view === "presentation") {
-      return /* @__PURE__ */ React.createElement(PresentationMode, {
-        onClose: () => setView("app")
-      });
+    function addSkillCan(name, level) {
+      if (me.skillsCan.some((k) => k.name === name)) {
+        setToastMsg("Already added");
+        return;
+      }
+      updateMe({ skillsCan: [...me.skillsCan, { name, level }] });
+      setToastMsg(`Added ${name} to your skills`);
     }
-
-    return /* @__PURE__ */ React.createElement(AppShell, {
-      page,
-      setPage,
-      me,
-      students,
-      notifications,
-      darkMode,
-      setDarkMode,
-      onOpenPresentation: () => setView("presentation"),
-      onLogout: () => setView("landing"),
-      mobileNavOpen,
-      setMobileNavOpen
-    },
-      page === "dashboard" && /* @__PURE__ */ React.createElement(Dashboard, { me, students, tasks, requests, notifications, setPage, setToast: triggerToast }),
-      page === "discover" && /* @__PURE__ */ React.createElement(Discover, {
-        me,
-        students,
-        onOpenProfile: (s) => setProfileModalStudent(s),
-        onOffer: (s) => handleStartConversation(s),
-        onMessage: (s) => handleStartConversation(s),
-        onExchange: (s) => handleStartConversation(s)
-      }),
-      page === "skills" && /* @__PURE__ */ React.createElement(SkillsPage, {
-        me,
-        onAddCan: handleAddCanSkill,
-        onRemoveCan: handleRemoveCanSkill,
-        onAddWant: handleAddWantSkill,
-        onRemoveWant: handleRemoveWantSkill
-      }),
-      page === "requests" && /* @__PURE__ */ React.createElement(LearningRequests, {
-        me,
-        students,
-        requests,
-        onCreate: handleCreateRequest,
-        onRespond: handleRespondRequest,
-        setToast: triggerToast
-      }),
-      page === "tasks" && /* @__PURE__ */ React.createElement(TasksPage, {
-        me,
-        students,
-        tasks,
-        onCreateTask: handleCreateTask,
-        onApplyTask: handleApplyTask,
-        onUpdateTaskStatus: handleUpdateTaskStatus,
-        setToast: triggerToast
-      }),
-      page === "projects" && /* @__PURE__ */ React.createElement(ProjectsPage, { me, students, projects, setToast: triggerToast }),
-      page === "messages" && /* @__PURE__ */ React.createElement(MessagesPage, { me, students, conversations, onSendMessage: handleSendMessage }),
-      page === "leaderboard" && /* @__PURE__ */ React.createElement(LeaderboardPage, { me, students }),
-      page === "notifications" && /* @__PURE__ */ React.createElement(NotificationsPage, {
-        notifications,
-        onMarkRead: (id) => setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n))
-      }),
-      page === "profile" && /* @__PURE__ */ React.createElement(ProfilePage, { me }),
-      page === "wallet" && /* @__PURE__ */ React.createElement(WalletPage, { me }),
-      page === "settings" && /* @__PURE__ */ React.createElement(SettingsPage, { darkMode, setDarkMode, setToast: triggerToast }),
-
-      profileModalStudent && /* @__PURE__ */ React.createElement(StudentProfileModal, {
-        student: profileModalStudent,
-        onClose: () => setProfileModalStudent(null),
-        onMessage: (s) => {
-          setProfileModalStudent(null);
-          handleStartConversation(s);
+    function removeSkillCan(idx) {
+      updateMe({ skillsCan: me.skillsCan.filter((_, i) => i !== idx) });
+    }
+    function addSkillWant(name) {
+      if (me.skillsWant.includes(name)) {
+        setToastMsg("Already added");
+        return;
+      }
+      updateMe({ skillsWant: [...me.skillsWant, name] });
+      setToastMsg(`Added ${name} to learning goals`);
+    }
+    function removeSkillWant(idx) {
+      updateMe({ skillsWant: me.skillsWant.filter((_, i) => i !== idx) });
+    }
+    function createTask(form) {
+      setTasks((prev) => [{ id: Date.now(), title: form.title, desc: form.desc, category: form.category, skill: form.skill, difficulty: form.difficulty, reward: form.reward, deadline: form.deadline, ownerId: me.id, status: "open", applicants: [], helperId: null }, ...prev]);
+    }
+    function applyToTask(id) {
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, applicants: [...t.applicants, me.id] } : t));
+    }
+    function acceptApplicant(id, studentId) {
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status: "in_progress", helperId: studentId } : t));
+      const helper = studentById(students, studentId);
+      pushNotification(`${helper.name} accepted your task application.`, "task", "tasks");
+    }
+    function submitWork(id) {
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status: "submitted" } : t));
+    }
+    function requestRevision(id) {
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status: "in_progress" } : t));
+    }
+    function approveTask(id) {
+      const task = tasks.find((t) => t.id === id);
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status: "completed" } : t));
+      if (task && task.helperId) {
+        setStudents((prev) => prev.map((s) => {
+          if (s.id !== task.helperId) return s;
+          const newCoins = s.coins + task.reward;
+          const newStats = { ...s.stats, tasksCompleted: s.stats.tasksCompleted + 1 };
+          let newBadges = s.badges;
+          if (!newBadges.includes("first")) newBadges = [...newBadges, "first"];
+          if (newStats.tasksCompleted >= 25 && !newBadges.includes("solver")) newBadges = [...newBadges, "solver"];
+          if (getRank(newCoins).key === "platinum" && !newBadges.includes("champion")) newBadges = [...newBadges, "champion"];
+          return { ...s, coins: newCoins, totalEarned: s.totalEarned + task.reward, stats: newStats, badges: newBadges };
+        }));
+        if (task.helperId === me.id) {
+          setTransactions((prev) => [{ label: "Completed: " + task.title, amount: task.reward }, ...prev]);
+          pushNotification(`You earned ${task.reward} UniCoins for completing "${task.title}".`, "coin", "wallet");
         }
-      }),
-
-      /* @__PURE__ */ React.createElement(Toast, { toast })
-    );
+      }
+    }
+    function createLearningRequest(form) {
+      setRequests((prev) => [{ id: Date.now(), title: form.title, desc: form.desc, category: form.category, skill: form.skill, availability: form.availability, posterId: me.id, responses: [] }, ...prev]);
+    }
+    function respondToRequest(id, text) {
+      setRequests((prev) => prev.map((r) => r.id === id ? { ...r, responses: [...r.responses, { studentId: me.id, text }] } : r));
+    }
+    function openConversationWith(student) {
+      let conv = conversations.find((c) => c.withId === student.id);
+      if (!conv) {
+        conv = { id: Date.now(), withId: student.id, messages: [] };
+        setConversations((prev) => [...prev, conv]);
+      }
+      setActiveConvId(conv.id);
+      setPage("messages");
+    }
+    function offerHelp(student) {
+      openConversationWith(student);
+      setConversations((prev) => prev.map((c) => c.withId === student.id ? { ...c, messages: [...c.messages, { from: me.id, text: `Hi ${student.name.split(" ")[0]}, I saw you want to learn something I can help with!` }] } : c));
+      setToastMsg(`Offered help to ${student.name}`);
+    }
+    function startExchange(student) {
+      openConversationWith(student);
+      setConversations((prev) => prev.map((c) => c.withId === student.id ? { ...c, messages: [...c.messages, { from: me.id, text: `Let's do a skill exchange \u{1F504} \u2014 I can teach you, and you can teach me!` }] } : c));
+      setToastMsg(`Skill exchange request sent to ${student.name}`);
+    }
+    function sendMessage(convId, text) {
+      setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, messages: [...c.messages, { from: me.id, text }] } : c));
+    }
+    function joinProject(id) {
+      setProjects((prev) => prev.map((p) => p.id === id && !p.members.includes(me.id) ? { ...p, members: [...p.members, me.id] } : p));
+    }
+    function inviteStudent(student) {
+      pushNotification(`You invited ${student.name} to your project.`, "task", "projects");
+    }
+    function readNotification(id) {
+      setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+    }
+    function handleAuthComplete({ form, canTeach, wantLearn }) {
+      setToastMsg("Account created \u2014 welcome to UniSkill Exchange \u{1F389}");
+      setMode("app");
+      setPage("dashboard");
+    }
+    const pageProps = {
+      dashboard: /* @__PURE__ */ React.createElement(Dashboard, { me, students, tasks, requests, notifications, setPage, setToast: setToastMsg }),
+      discover: /* @__PURE__ */ React.createElement(Discover, { me, students, onOpenProfile: setProfileModalStudent, onOffer: offerHelp, onMessage: openConversationWith, onExchange: startExchange }),
+      skills: /* @__PURE__ */ React.createElement(SkillsPage, { me, onAddCan: addSkillCan, onRemoveCan: removeSkillCan, onAddWant: addSkillWant, onRemoveWant: removeSkillWant }),
+      requests: /* @__PURE__ */ React.createElement(LearningRequests, { me, students, requests, onCreate: createLearningRequest, onRespond: respondToRequest, setToast: setToastMsg }),
+      tasks: /* @__PURE__ */ React.createElement(Tasks, { me, students, tasks, onCreate: createTask, onApply: applyToTask, onAccept: acceptApplicant, onSubmitWork: submitWork, onApprove: approveTask, onRevision: requestRevision, setToast: setToastMsg }),
+      projects: /* @__PURE__ */ React.createElement(Projects, { me, students, projects, onJoin: joinProject, onInvite: inviteStudent, setToast: setToastMsg }),
+      messages: /* @__PURE__ */ React.createElement(Messages, { me, students, conversations, activeConvId, setActiveConvId, onSend: sendMessage }),
+      leaderboard: /* @__PURE__ */ React.createElement(Leaderboard, { students, me }),
+      notifications: /* @__PURE__ */ React.createElement(NotificationsPage, { notifications, onRead: readNotification, setPage }),
+      profile: /* @__PURE__ */ React.createElement(ProfilePage, { me, isEditing: isEditingProfile, setIsEditing: setIsEditingProfile }),
+      wallet: /* @__PURE__ */ React.createElement(WalletPage, { me, transactions }),
+      settings: /* @__PURE__ */ React.createElement(SettingsPage, { darkMode, setDarkMode, onLogout: () => setMode("landing") })
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: darkMode ? "theme-dark" : "theme-light" }, /* @__PURE__ */ React.createElement(Toast, { toast: toastMsg }), mode === "landing" && /* @__PURE__ */ React.createElement(Landing, { onEnterAuth: () => setMode("auth"), onDemoLogin: () => {
+      setMode("app");
+      setPage("dashboard");
+    }, onOpenPresentation: () => setMode("demo") }), mode === "auth" && /* @__PURE__ */ React.createElement(AuthFlow, { onComplete: handleAuthComplete, onBack: () => setMode("landing") }), mode === "demo" && /* @__PURE__ */ React.createElement(PresentationMode, { onExit: () => setMode("landing"), onEnterApp: () => {
+      setMode("app");
+      setPage("dashboard");
+    } }), mode === "app" && /* @__PURE__ */ React.createElement(
+      AppShell,
+      {
+        page,
+        setPage,
+        me,
+        students,
+        notifications,
+        darkMode,
+        setDarkMode,
+        onOpenPresentation: () => setMode("demo"),
+        onLogout: () => setMode("landing"),
+        mobileNavOpen,
+        setMobileNavOpen
+      },
+      pageProps[page]
+    ), profileModalStudent && /* @__PURE__ */ React.createElement(StudentProfileModal, { student: profileModalStudent, onClose: () => setProfileModalStudent(null), onMessage: (s) => {
+      setProfileModalStudent(null);
+      openConversationWith(s);
+    } }));
   }
-
-  const root = ReactDOM.createRoot(document.getElementById("root"));
-  root.render(/* @__PURE__ */ React.createElement(MainApp));
+  ReactDOM.createRoot(document.getElementById("root")).render(/* @__PURE__ */ React.createElement(App, null));
 })();
 </script>
 </body>
